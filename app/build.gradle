@@ -8,6 +8,10 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
+
+    // The Checkstyle plugin performs quality checks on your project’s Java source files using Checkstyle and
+    // generates reports from these checks.
+    id 'checkstyle'
 }
 
 repositories {
@@ -23,6 +27,11 @@ dependencies {
 
     // This dependency is used by the application.
     implementation libs.guava
+}
+
+checkstyle {
+    toolVersion = '10.20.1'
+    configFile = file('../config/checkstyle/checkstyle.xml')
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
