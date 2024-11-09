@@ -12,6 +12,9 @@ plugins {
     // The Checkstyle plugin performs quality checks on your project’s Java source files using Checkstyle and
     // generates reports from these checks.
     id 'checkstyle'
+
+    // Formatting codes
+    id 'com.diffplug.spotless' version '6.25.0'
 }
 
 repositories {
@@ -31,7 +34,33 @@ dependencies {
 
 checkstyle {
     toolVersion = '10.20.1'
+    // Directly copied from: https://github.com/checkstyle/checkstyle/blob/master/src/main/resources/google_checks.xml
     configFile = file('../config/checkstyle/checkstyle.xml')
+}
+
+// Directly copied from: https://github.com/diffplug/spotless/tree/main/plugin-gradle#java
+spotless {
+    java {
+        // Use the default importOrder configuration
+        importOrder()
+        // optional: you can specify import groups directly
+        // note: you can use an empty string for all the imports you didn't specify explicitly, '|' to join group without blank line, and '\\#` prefix for static imports
+        // importOrder('java|javax', 'com.acme', '', '\\#com.acme', '\\#')
+        // optional: instead of specifying import groups directly you can specify a config file
+        // export config file: https://github.com/diffplug/spotless/blob/main/ECLIPSE_SCREENSHOTS.md#creating-spotlessimportorder
+        // importOrderFile('eclipse-import-order.txt') // import order file as exported from eclipse
+
+        removeUnusedImports()
+
+        // Cleanthat will refactor your code, but it may break your style: apply it before your formatter
+        cleanthat()
+
+        googleJavaFormat()
+
+        formatAnnotations()  // fixes formatting of type annotations
+
+        // licenseHeader '/* (C) $YEAR */' // or licenseHeaderFile
+    }
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
