@@ -8,7 +8,7 @@ import java.util.Objects;
 public class SimpleRemindStore implements RemindStore {
   private TokenBuilder tokenBuilder;
   private final Map<TimePoint, LinkedList<RemindRequest>> remindStore;
-  private final Map<Token, RemindRequest> indexes;
+  private final Map<Token, Pair<TimePoint, RemindRequest>> indexes;
 
   public SimpleRemindStore() {
     this.tokenBuilder = new UuidTokenBuilder();
@@ -29,23 +29,52 @@ public class SimpleRemindStore implements RemindStore {
     this.remindStore.get(timePoint).add(remindRequest);
 
     Token token = this.tokenBuilder.with(remindRequest.getUser()).build();
-    this.indexes.put(token, remindRequest);
+
+    remindRequest.setToken(token);
+    this.indexes.put(token, new Pair<>(timePoint, remindRequest));
 
     return token;
   }
 
   @Override
   public RemindRequest get(Token token) {
-    return this.indexes.get(token);
+    Pair<TimePoint, RemindRequest> pair = this.indexes.get(token);
+    if (pair == null) {
+      return null;
+    }
+
+    return pair.second();
   }
 
   @Override
   public boolean delete(Token token) {
-    return false;
+    Pair<TimePoint, RemindRequest> pair = this.indexes.get(token);
+    if (pair == null) {
+      return false;
+    }
+
+    LinkedList<RemindRequest> list = this.remindStore.get(pair.first());
+    if (list == null) {
+      return false;
+    }
+
+    this.indexes.remove(token);
+
+    return list.remove(pair.second());
   }
 
   @Override
   public boolean delete(TimePoint timePoint) {
-    return false;
+    LinkedList<RemindRequest> list = this.remindStore.get(timePoint);
+    if (list == null) {
+      return false;
+    }
+
+    for (RemindRequest remindRequest : list) {
+      this.indexes.remove(remindRequest.getToken());
+    }
+    this.remindStore.remove(timePoint);
+
+    return true;
   }
 }

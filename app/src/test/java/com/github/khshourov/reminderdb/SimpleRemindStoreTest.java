@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -87,5 +88,52 @@ public class SimpleRemindStoreTest {
     RemindRequest storedRequest = this.simpleRemindStore.get(token);
 
     assertNull(storedRequest);
+  }
+
+  @Test
+  void canDeletePreviouslyStoredRemindRequestIfTokenProvided() {
+    TimePoint timePoint = new TimePoint(120);
+    RemindRequest request = new RemindRequest(user);
+
+    Token token = this.simpleRemindStore.set(timePoint, request);
+
+    boolean deleted = this.simpleRemindStore.delete(token);
+
+    assertTrue(deleted);
+    assertNull(this.simpleRemindStore.get(token));
+  }
+
+  @Test
+  void cannotDeleteIfTokenIsNotFound() {
+    Token token = (new UuidTokenBuilder()).with(user).build();
+
+    boolean deleted = this.simpleRemindStore.delete(token);
+
+    assertFalse(deleted);
+  }
+
+  @Test
+  void canDeletePreviouslyStoredRemindRequestsIfTimePointProvided() {
+    TimePoint timePoint = new TimePoint(120);
+    RemindRequest request1 = new RemindRequest(user);
+    RemindRequest request2 = new RemindRequest(user);
+
+    Token token1 = this.simpleRemindStore.set(timePoint, request1);
+    Token token2 = this.simpleRemindStore.set(timePoint, request2);
+
+    boolean deleted = this.simpleRemindStore.delete(timePoint);
+
+    assertTrue(deleted);
+    assertNull(this.simpleRemindStore.get(token1));
+    assertNull(this.simpleRemindStore.get(token2));
+  }
+
+  @Test
+  void cannotDeleteIfTimePointIsNotFound() {
+    TimePoint timePoint = new TimePoint(120);
+
+    boolean deleted = this.simpleRemindStore.delete(timePoint);
+
+    assertFalse(deleted);
   }
 }
