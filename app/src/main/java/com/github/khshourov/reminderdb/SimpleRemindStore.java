@@ -8,10 +8,12 @@ import java.util.Objects;
 public class SimpleRemindStore implements RemindStore {
   private TokenBuilder tokenBuilder;
   private final Map<TimePoint, LinkedList<RemindRequest>> remindStore;
+  private final Map<Token, RemindRequest> indexes;
 
   public SimpleRemindStore() {
     this.tokenBuilder = new UuidTokenBuilder();
     this.remindStore = new HashMap<>();
+    this.indexes = new HashMap<>();
   }
 
   public void setTokenBuilder(TokenBuilder tokenBuilder) {
@@ -25,12 +27,16 @@ public class SimpleRemindStore implements RemindStore {
 
     this.remindStore.putIfAbsent(timePoint, new LinkedList<>());
     this.remindStore.get(timePoint).add(remindRequest);
-    return this.tokenBuilder.with(remindRequest.getUser()).build();
+
+    Token token = this.tokenBuilder.with(remindRequest.getUser()).build();
+    this.indexes.put(token, remindRequest);
+
+    return token;
   }
 
   @Override
   public RemindRequest get(Token token) {
-    return null;
+    return this.indexes.get(token);
   }
 
   @Override
