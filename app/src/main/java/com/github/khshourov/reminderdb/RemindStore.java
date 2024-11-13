@@ -1,5 +1,7 @@
 package com.github.khshourov.reminderdb;
 
+import com.github.khshourov.reminderdb.lib.TokenBuilder.TokenBuilder;
+
 public interface RemindStore {
   void setTokenBuilder(TokenBuilder tokenBuilder);
 

@@ -1,5 +1,7 @@
-package com.github.khshourov.reminderdb;
+package com.github.khshourov.reminderdb.lib.TokenBuilder;
 
+import com.github.khshourov.reminderdb.Token;
+import com.github.khshourov.reminderdb.User;
 import java.util.Objects;
 import java.util.UUID;
 

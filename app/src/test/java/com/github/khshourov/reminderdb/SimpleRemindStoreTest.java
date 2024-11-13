@@ -8,6 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.github.khshourov.reminderdb.lib.TokenBuilder.FixedTokenBuilder;
+import com.github.khshourov.reminderdb.lib.TokenBuilder.TokenBuilder;
+import com.github.khshourov.reminderdb.lib.TokenBuilder.UuidTokenBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
