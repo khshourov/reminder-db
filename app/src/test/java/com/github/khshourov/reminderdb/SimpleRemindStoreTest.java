@@ -12,131 +12,135 @@ import com.github.khshourov.reminderdb.lib.TokenBuilder.FixedTokenBuilder;
 import com.github.khshourov.reminderdb.lib.TokenBuilder.TokenBuilder;
 import com.github.khshourov.reminderdb.lib.TokenBuilder.UuidTokenBuilder;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 public class SimpleRemindStoreTest {
+  final TimePoint timePoint120 = new TimePoint(120);
   RemindStore simpleRemindStore;
   User user;
 
   @BeforeEach
-  void createSimpleRemindStore() {
-    simpleRemindStore = new SimpleRemindStore();
-    user = new User(1);
+  void init() {
+    this.simpleRemindStore = new SimpleRemindStore();
+    this.user = new User(1);
   }
 
   @Test
   void remindStoreShouldProvideDefaultTokenBuilder() {
-    TimePoint timePoint = new TimePoint(120);
     RemindRequest request = new RemindRequest(user);
 
     assertDoesNotThrow(
         () -> {
-          this.simpleRemindStore.set(timePoint, request);
+          this.simpleRemindStore.set(timePoint120, request);
         });
   }
 
-  @Test
-  void setTokenBuilderMethodShouldUpdateTheTokenBuilder() {
-    TokenBuilder tokenBuilder = new FixedTokenBuilder();
-    TimePoint timePoint = new TimePoint(120);
-    RemindRequest request = new RemindRequest(user);
+  @Nested
+  class WhenSetTokenBuilder {
+    @Test
+    void setTokenBuilderMethodShouldUpdateTheTokenBuilder() {
+      TokenBuilder tokenBuilder = new FixedTokenBuilder();
+      RemindRequest request = new RemindRequest(user);
 
-    this.simpleRemindStore.setTokenBuilder(tokenBuilder);
+      simpleRemindStore.setTokenBuilder(tokenBuilder);
 
-    Token token = this.simpleRemindStore.set(timePoint, request);
+      Token token = simpleRemindStore.set(timePoint120, request);
 
-    assertEquals(new Token(FixedTokenBuilder.FIXED_TOKEN), token);
+      assertEquals(new Token(FixedTokenBuilder.FIXED_TOKEN), token);
+    }
   }
 
-  @Test
-  void canAddRequestToTimePoint() {
-    TimePoint timePoint = new TimePoint(120);
-    RemindRequest request = new RemindRequest(user);
+  @Nested
+  class WhenSet {
+    @Test
+    void remindRequestShouldBeAddedToTimePoint() {
+      RemindRequest request = new RemindRequest(user);
 
-    Token token = this.simpleRemindStore.set(timePoint, request);
+      Token token = simpleRemindStore.set(timePoint120, request);
 
-    assertNotNull(token);
-    assertFalse(token.value().isEmpty());
+      assertNotNull(token);
+      assertFalse(token.value().isEmpty());
+    }
+
+    @Test
+    void twoDifferentRequestShouldCreateTwoDifferentToken() {
+      RemindRequest request1 = new RemindRequest(user);
+      RemindRequest request2 = new RemindRequest(user);
+
+      Token token1 = simpleRemindStore.set(timePoint120, request1);
+      Token token2 = simpleRemindStore.set(timePoint120, request2);
+
+      assertNotEquals(token1, token2);
+    }
   }
 
-  @Test
-  void twoDifferentRequestShouldCreateTwoDifferentToken() {
-    TimePoint timePoint = new TimePoint(120);
+  @Nested
+  class WhenGet {
+    @Test
+    void previouslyStoredRemindRequestShouldBeFetchedIfValidTokenIsProvided() {
+      RemindRequest request = new RemindRequest(user);
 
-    RemindRequest request1 = new RemindRequest(user);
-    RemindRequest request2 = new RemindRequest(user);
+      Token token = simpleRemindStore.set(timePoint120, request);
 
-    Token token1 = this.simpleRemindStore.set(timePoint, request1);
-    Token token2 = this.simpleRemindStore.set(timePoint, request2);
+      RemindRequest storedRequest = simpleRemindStore.get(token);
 
-    assertNotEquals(token1, token2);
+      assertEquals(request, storedRequest);
+    }
+
+    @Test
+    void nullShouldReturnIfTokenIsNotFound() {
+      Token token = (new UuidTokenBuilder()).with(user).build();
+
+      RemindRequest storedRequest = simpleRemindStore.get(token);
+
+      assertNull(storedRequest);
+    }
   }
 
-  @Test
-  void canGetPreviouslyStoredRemindRequestIfTokenProvided() {
-    TimePoint timePoint = new TimePoint(120);
-    RemindRequest request = new RemindRequest(user);
+  @Nested
+  class WhenDelete {
+    @Test
+    void previouslyStoredRemindRequestShouldBeDeletedIfTokenIsProvided() {
+      RemindRequest request = new RemindRequest(user);
 
-    Token token = this.simpleRemindStore.set(timePoint, request);
+      Token token = simpleRemindStore.set(timePoint120, request);
 
-    RemindRequest storedRequest = this.simpleRemindStore.get(token);
+      boolean deleted = simpleRemindStore.delete(token);
 
-    assertEquals(request, storedRequest);
-  }
+      assertTrue(deleted);
+      assertNull(simpleRemindStore.get(token));
+    }
 
-  @Test
-  void shouldReturnNullIfTokenIsNotFound() {
-    Token token = (new UuidTokenBuilder()).with(user).build();
+    @Test
+    void falseShouldReturnIfTokenIsNotFound() {
+      Token token = (new UuidTokenBuilder()).with(user).build();
 
-    RemindRequest storedRequest = this.simpleRemindStore.get(token);
+      boolean deleted = simpleRemindStore.delete(token);
 
-    assertNull(storedRequest);
-  }
+      assertFalse(deleted);
+    }
 
-  @Test
-  void canDeletePreviouslyStoredRemindRequestIfTokenProvided() {
-    TimePoint timePoint = new TimePoint(120);
-    RemindRequest request = new RemindRequest(user);
+    @Test
+    void previouslyStoredRemindRequestsShouldBeDeletedIfTimePointIsProvided() {
+      RemindRequest request1 = new RemindRequest(user);
+      RemindRequest request2 = new RemindRequest(user);
 
-    Token token = this.simpleRemindStore.set(timePoint, request);
+      Token token1 = simpleRemindStore.set(timePoint120, request1);
+      Token token2 = simpleRemindStore.set(timePoint120, request2);
 
-    boolean deleted = this.simpleRemindStore.delete(token);
+      boolean deleted = simpleRemindStore.delete(timePoint120);
 
-    assertTrue(deleted);
-    assertNull(this.simpleRemindStore.get(token));
-  }
+      assertTrue(deleted);
+      assertNull(simpleRemindStore.get(token1));
+      assertNull(simpleRemindStore.get(token2));
+    }
 
-  @Test
-  void cannotDeleteIfTokenIsNotFound() {
-    Token token = (new UuidTokenBuilder()).with(user).build();
+    @Test
+    void falseShouldReturnIfTimePointIsNotFound() {
+      boolean deleted = simpleRemindStore.delete(timePoint120);
 
-    boolean deleted = this.simpleRemindStore.delete(token);
-
-    assertFalse(deleted);
-  }
-
-  @Test
-  void canDeletePreviouslyStoredRemindRequestsIfTimePointProvided() {
-    TimePoint timePoint = new TimePoint(120);
-    RemindRequest request1 = new RemindRequest(user);
-    RemindRequest request2 = new RemindRequest(user);
-
-    Token token1 = this.simpleRemindStore.set(timePoint, request1);
-    Token token2 = this.simpleRemindStore.set(timePoint, request2);
-
-    boolean deleted = this.simpleRemindStore.delete(timePoint);
-
-    assertTrue(deleted);
-    assertNull(this.simpleRemindStore.get(token1));
-    assertNull(this.simpleRemindStore.get(token2));
-  }
-
-  @Test
-  void cannotDeleteIfTimePointIsNotFound() {
-    TimePoint timePoint = new TimePoint(120);
-
-    boolean deleted = this.simpleRemindStore.delete(timePoint);
-
-    assertFalse(deleted);
+      assertFalse(deleted);
+    }
   }
 }
