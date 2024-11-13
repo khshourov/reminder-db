@@ -1,4 +1,4 @@
-package com.github.khshourov.reminderdb.lib.TokenBuilder;
+package com.github.khshourov.reminderdb.lib.tokenbuilder;
 
 import com.github.khshourov.reminderdb.models.Token;
 import com.github.khshourov.reminderdb.models.User;

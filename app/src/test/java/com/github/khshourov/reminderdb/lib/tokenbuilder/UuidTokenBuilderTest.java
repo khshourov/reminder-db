@@ -1,4 +1,4 @@
-package com.github.khshourov.reminderdb.lib.TokenBuilder;
+package com.github.khshourov.reminderdb.lib.tokenbuilder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

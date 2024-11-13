@@ -1,4 +1,4 @@
-package com.github.khshourov.reminderdb;
+package com.github.khshourov.reminderdb.lib.remindstore;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -8,11 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.github.khshourov.reminderdb.lib.RemindStore.RemindStore;
-import com.github.khshourov.reminderdb.lib.RemindStore.SimpleRemindStore;
-import com.github.khshourov.reminderdb.lib.TokenBuilder.FixedTokenBuilder;
-import com.github.khshourov.reminderdb.lib.TokenBuilder.TokenBuilder;
-import com.github.khshourov.reminderdb.lib.TokenBuilder.UuidTokenBuilder;
+import com.github.khshourov.reminderdb.lib.tokenbuilder.TokenBuilder;
+import com.github.khshourov.reminderdb.lib.tokenbuilder.UuidTokenBuilder;
 import com.github.khshourov.reminderdb.models.RemindRequest;
 import com.github.khshourov.reminderdb.models.TimePoint;
 import com.github.khshourov.reminderdb.models.Token;
@@ -147,6 +144,20 @@ public class SimpleRemindStoreTest {
       boolean deleted = simpleRemindStore.delete(timePoint120);
 
       assertFalse(deleted);
+    }
+  }
+
+  private static class FixedTokenBuilder implements TokenBuilder {
+    public static final String FIXED_TOKEN = "fixed-token";
+
+    @Override
+    public TokenBuilder with(Object object) {
+      return this;
+    }
+
+    @Override
+    public Token build() {
+      return new Token(FIXED_TOKEN);
     }
   }
 }

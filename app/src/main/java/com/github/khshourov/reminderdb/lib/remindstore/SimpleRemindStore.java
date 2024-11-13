@@ -1,7 +1,7 @@
-package com.github.khshourov.reminderdb.lib.RemindStore;
+package com.github.khshourov.reminderdb.lib.remindstore;
 
-import com.github.khshourov.reminderdb.lib.TokenBuilder.TokenBuilder;
-import com.github.khshourov.reminderdb.lib.TokenBuilder.UuidTokenBuilder;
+import com.github.khshourov.reminderdb.lib.tokenbuilder.TokenBuilder;
+import com.github.khshourov.reminderdb.lib.tokenbuilder.UuidTokenBuilder;
 import com.github.khshourov.reminderdb.lib.utils.Pair;
 import com.github.khshourov.reminderdb.models.RemindRequest;
 import com.github.khshourov.reminderdb.models.TimePoint;
