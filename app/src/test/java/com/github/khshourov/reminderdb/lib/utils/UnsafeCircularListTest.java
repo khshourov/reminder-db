@@ -2,6 +2,8 @@ package com.github.khshourov.reminderdb.lib.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Iterator;
@@ -9,12 +11,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-public class UnsafeLinkedListTest {
-  UnsafeLinkedList<Integer> list;
+public class UnsafeCircularListTest {
+  UnsafeCircularList<Integer> list;
 
   @BeforeEach
   void init() {
-    list = new UnsafeLinkedList<>();
+    list = new UnsafeCircularList<>();
   }
 
   @Nested
@@ -25,6 +27,10 @@ public class UnsafeLinkedListTest {
       UnsafeNode<Integer> itemNode = list.add(1);
 
       assertEquals(1, itemNode.item);
+      // Because it's circular, and we're keeping an anchor
+      // node, both `prev` and `next` will point to that node
+      assertNotNull(itemNode.prev);
+      assertEquals(itemNode.prev, itemNode.next);
     }
 
     @Test
@@ -39,6 +45,9 @@ public class UnsafeLinkedListTest {
       // and we've to ensure if our expectation is met i.e. itemNode1 -> itemNode2
       assertEquals(itemNode2, itemNode1.next);
       assertEquals(itemNode1, itemNode2.prev);
+      // and itemNode1.prev --> anchor node <-- itemNode2.next
+      assertNotNull(itemNode1.prev);
+      assertEquals(itemNode1.prev, itemNode2.next);
     }
   }
 
@@ -46,7 +55,7 @@ public class UnsafeLinkedListTest {
   class WhenDeletingNode {
 
     @Test
-    void falseShouldTrueWhenDeletableNodeIsNull() {
+    void falseShouldReturnWhenDeletableNodeIsNull() {
       boolean deleted = list.delete(null);
 
       assertFalse(deleted);
@@ -59,6 +68,10 @@ public class UnsafeLinkedListTest {
       boolean deleted = list.delete(itemNode);
 
       assertTrue(deleted);
+      // Make sure the node's references are null.
+      // Otherwise, those instances won't be GC.
+      assertNull(itemNode.prev);
+      assertNull(itemNode.next);
       assertTrue(list.isEmpty());
     }
 
