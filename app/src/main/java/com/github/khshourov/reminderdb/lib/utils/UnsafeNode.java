@@ -8,4 +8,8 @@ public class UnsafeNode<T> {
   public UnsafeNode(T item) {
     this.item = item;
   }
+
+  public T getItem() {
+    return item;
+  }
 }
