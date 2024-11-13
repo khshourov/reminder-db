@@ -8,9 +8,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.github.khshourov.reminderdb.lib.RemindStore.RemindStore;
+import com.github.khshourov.reminderdb.lib.RemindStore.SimpleRemindStore;
 import com.github.khshourov.reminderdb.lib.TokenBuilder.FixedTokenBuilder;
 import com.github.khshourov.reminderdb.lib.TokenBuilder.TokenBuilder;
 import com.github.khshourov.reminderdb.lib.TokenBuilder.UuidTokenBuilder;
+import com.github.khshourov.reminderdb.models.RemindRequest;
+import com.github.khshourov.reminderdb.models.TimePoint;
+import com.github.khshourov.reminderdb.models.Token;
+import com.github.khshourov.reminderdb.models.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

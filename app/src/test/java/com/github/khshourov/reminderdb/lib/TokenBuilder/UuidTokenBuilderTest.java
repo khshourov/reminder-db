@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.github.khshourov.reminderdb.Token;
-import com.github.khshourov.reminderdb.User;
+import com.github.khshourov.reminderdb.models.Token;
+import com.github.khshourov.reminderdb.models.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -1,6 +1,6 @@
 package com.github.khshourov.reminderdb.lib.TokenBuilder;
 
-import com.github.khshourov.reminderdb.Token;
+import com.github.khshourov.reminderdb.models.Token;
 
 public class FixedTokenBuilder implements TokenBuilder {
   public static final String FIXED_TOKEN = "fixed-token";

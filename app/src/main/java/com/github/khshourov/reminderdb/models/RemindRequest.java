@@ -1,4 +1,4 @@
-package com.github.khshourov.reminderdb;
+package com.github.khshourov.reminderdb.models;
 
 public class RemindRequest {
   private User user;

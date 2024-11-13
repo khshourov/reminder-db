@@ -1,7 +1,11 @@
-package com.github.khshourov.reminderdb;
+package com.github.khshourov.reminderdb.lib.RemindStore;
 
 import com.github.khshourov.reminderdb.lib.TokenBuilder.TokenBuilder;
 import com.github.khshourov.reminderdb.lib.TokenBuilder.UuidTokenBuilder;
+import com.github.khshourov.reminderdb.lib.utils.Pair;
+import com.github.khshourov.reminderdb.models.RemindRequest;
+import com.github.khshourov.reminderdb.models.TimePoint;
+import com.github.khshourov.reminderdb.models.Token;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
