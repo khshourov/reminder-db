@@ -12,19 +12,19 @@ public class UuidTokenBuilderTest {
   TokenBuilder tokenBuilder;
 
   @BeforeEach
-  void createTokenBuilder() {
+  void init() {
     this.tokenBuilder = new UuidTokenBuilder();
   }
 
   @Test
-  void withMethodShouldReturnTheBuilderInstance() {
+  void progressiveStepsShouldReturnThisInstance() {
     User user = new User(1);
 
     assertEquals(this.tokenBuilder, this.tokenBuilder.with(user));
   }
 
   @Test
-  void nullUserShouldThrowException() {
+  void nullUserShouldThrowExceptionWhenBuildingToken() {
     assertThrows(
         NullPointerException.class,
         () -> {
@@ -33,22 +33,13 @@ public class UuidTokenBuilderTest {
   }
 
   @Test
-  void generateTokenThatHasUserIdPrefix() {
+  void generatedTokenShouldConfirmTheDesiredPattern() {
     User user = new User(1);
 
     Token token = this.tokenBuilder.with(user).build();
 
     assertNotNull(token);
     assertTrue(token.value().startsWith("user-1"));
-  }
-
-  @Test
-  void generateTokenThatHasUuid4Suffix() {
-    User user = new User(1);
-
-    Token token = this.tokenBuilder.with(user).build();
-
-    assertNotNull(token);
     assertEquals(2, token.value().split(":").length);
 
     String uuid = token.value().split(":")[1];
