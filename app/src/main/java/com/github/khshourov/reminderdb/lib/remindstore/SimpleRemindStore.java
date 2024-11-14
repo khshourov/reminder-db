@@ -10,10 +10,8 @@ import com.github.khshourov.reminderdb.models.RemindRequest;
 import com.github.khshourov.reminderdb.models.TimePoint;
 import com.github.khshourov.reminderdb.models.Token;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -105,9 +103,8 @@ public class SimpleRemindStore implements RemindStore {
     private final TimePointRange timePointRange;
     private final Predicate<RemindRequest> filter;
 
-    private final List<TimePoint> timePoints;
-    private int currTimePointIndex;
-    private Iterator<RemindRequest> iterator;
+    private final Iterator<TimePoint> timePointIterator;
+    private Iterator<RemindRequest> remindRequestIterator;
     private RemindRequest remindRequest;
 
     public SimpleRemindStoreIterator(
@@ -115,11 +112,8 @@ public class SimpleRemindStore implements RemindStore {
       this.timePointRange = timePointRange;
       this.filter = filter;
 
-      this.timePoints = new ArrayList<>(remindStore.keySet());
-      Collections.sort(this.timePoints);
-
-      this.currTimePointIndex = 0;
-      this.iterator = this.nextIterator();
+      this.timePointIterator = new ArrayList<>(remindStore.keySet()).stream().sorted().iterator();
+      this.remindRequestIterator = this.nextIterator();
     }
 
     @Override
@@ -134,39 +128,27 @@ public class SimpleRemindStore implements RemindStore {
     }
 
     private Iterator<RemindRequest> nextIterator() {
-      if (this.currTimePointIndex == this.timePoints.size()) {
-        return null;
-      }
-
-      TimePoint currTimePoint = this.timePoints.get(this.currTimePointIndex);
-      while (!currTimePoint.isBetween(this.timePointRange)
-          || remindStore.get(currTimePoint) == null) {
-        this.currTimePointIndex = this.currTimePointIndex + 1;
-        if (this.currTimePointIndex == this.timePoints.size()) {
-          return null;
+      while (this.timePointIterator.hasNext()) {
+        TimePoint currTimePoint = this.timePointIterator.next();
+        if (currTimePoint.isBetween(this.timePointRange)
+            && remindStore.get(currTimePoint) != null) {
+          return remindStore.get(currTimePoint).iterator();
         }
-
-        currTimePoint = this.timePoints.get(this.currTimePointIndex);
       }
 
-      if (!currTimePoint.isBetween(this.timePointRange)) {
-        return null;
-      }
-
-      return remindStore.get(currTimePoint).iterator();
+      return null;
     }
 
     private RemindRequest nextRemindRequest() {
-      while (this.iterator != null) {
-        while (this.iterator.hasNext()) {
-          RemindRequest remindRequest = this.iterator.next();
+      while (this.remindRequestIterator != null) {
+        while (this.remindRequestIterator.hasNext()) {
+          RemindRequest remindRequest = this.remindRequestIterator.next();
           if (filter == null || filter.test(remindRequest)) {
             return remindRequest;
           }
         }
 
-        this.currTimePointIndex = this.currTimePointIndex + 1;
-        this.iterator = this.nextIterator();
+        this.remindRequestIterator = this.nextIterator();
       }
 
       return null;
