@@ -83,6 +83,8 @@ public class SimpleRemindStore implements RemindStore {
       RemindRequest remindRequest = iterator.next();
       this.indexes.remove(remindRequest.getToken());
     }
+
+    list.deleteAll();
     this.remindStore.remove(timePoint);
 
     return true;
