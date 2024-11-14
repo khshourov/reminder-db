@@ -8,10 +8,14 @@ import com.github.khshourov.reminderdb.lib.utils.UnsafeNode;
 import com.github.khshourov.reminderdb.models.RemindRequest;
 import com.github.khshourov.reminderdb.models.TimePoint;
 import com.github.khshourov.reminderdb.models.Token;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 public class SimpleRemindStore implements RemindStore {
   private TokenBuilder tokenBuilder;
@@ -88,5 +92,95 @@ public class SimpleRemindStore implements RemindStore {
     this.remindStore.remove(timePoint);
 
     return true;
+  }
+
+  @Override
+  public Iterator<RemindRequest> iterator(
+      TimePoint start, TimePoint end, Predicate<RemindRequest> filter) {
+    return new SimpleRemindStoreIterator(start, end, filter);
+  }
+
+  public class SimpleRemindStoreIterator implements Iterator<RemindRequest> {
+    private TimePoint start;
+    private TimePoint end;
+    private Predicate<RemindRequest> filter;
+
+    private final List<TimePoint> timePoints;
+    private int currTimePointIndex;
+    private Iterator<RemindRequest> iterator;
+    private RemindRequest remindRequest;
+
+    public SimpleRemindStoreIterator(
+        TimePoint start, TimePoint end, Predicate<RemindRequest> filter) {
+      this.timePoints = new ArrayList<>(remindStore.keySet());
+      Collections.sort(this.timePoints);
+
+      if (!this.timePoints.isEmpty()) {
+        this.start = start != null ? start : this.timePoints.getFirst();
+        this.end = end != null ? end : new TimePoint(this.timePoints.getLast().value() + 1);
+      } else {
+        this.start = new TimePoint(0);
+        this.end = new TimePoint(0);
+      }
+      if (this.start.isGreaterThanEqual(this.end)) {
+        TimePoint temp = this.start;
+        this.start = this.end;
+        this.end = temp;
+      }
+      this.filter = filter;
+
+      this.currTimePointIndex = 0;
+      this.iterator = this.nextIterator();
+    }
+
+    @Override
+    public boolean hasNext() {
+      this.remindRequest = this.nextRemindRequest();
+      return this.remindRequest != null;
+    }
+
+    @Override
+    public RemindRequest next() {
+      return this.remindRequest;
+    }
+
+    private Iterator<RemindRequest> nextIterator() {
+      if (this.currTimePointIndex == this.timePoints.size()) {
+        return null;
+      }
+
+      TimePoint currTimePoint = this.timePoints.get(this.currTimePointIndex);
+      while (!currTimePoint.isGreaterThanEqual(this.start)
+          || (currTimePoint.isLessThan(this.end) && remindStore.get(currTimePoint) == null)) {
+        this.currTimePointIndex = this.currTimePointIndex + 1;
+        if (this.currTimePointIndex == this.timePoints.size()) {
+          return null;
+        }
+
+        currTimePoint = this.timePoints.get(this.currTimePointIndex);
+      }
+
+      if (!currTimePoint.isLessThan(this.end)) {
+        return null;
+      }
+
+      return remindStore.get(currTimePoint).iterator();
+    }
+
+    private RemindRequest nextRemindRequest() {
+      while (this.iterator != null) {
+        while (this.iterator.hasNext()) {
+          RemindRequest remindRequest = this.iterator.next();
+          if (filter == null || filter.test(remindRequest)) {
+            return remindRequest;
+          }
+        }
+
+        this.currTimePointIndex = this.currTimePointIndex + 1;
+        this.iterator = this.nextIterator();
+      }
+
+      return null;
+    }
   }
 }

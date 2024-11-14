@@ -14,6 +14,7 @@ import com.github.khshourov.reminderdb.models.RemindRequest;
 import com.github.khshourov.reminderdb.models.TimePoint;
 import com.github.khshourov.reminderdb.models.Token;
 import com.github.khshourov.reminderdb.models.User;
+import java.util.Iterator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -144,6 +145,200 @@ public class SimpleRemindStoreTest {
       boolean deleted = simpleRemindStore.delete(timePoint120);
 
       assertFalse(deleted);
+    }
+  }
+
+  @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
+  @Nested
+  class WhenIterate {
+
+    @Test
+    void remindRequestsShouldBeReturnedWhenTwoTimePointsGiven() {
+      User u1 = new User(1);
+      User u2 = new User(2);
+
+      RemindRequest r1 = new RemindRequest(u1);
+      RemindRequest r2 = new RemindRequest(u2);
+      RemindRequest r3 = new RemindRequest(u1);
+      RemindRequest r4 = new RemindRequest(u2);
+
+      TimePoint t1 = new TimePoint(1);
+      TimePoint t2 = new TimePoint(2);
+      TimePoint t3 = new TimePoint(3);
+      TimePoint t4 = new TimePoint(4);
+
+      Token token1 = simpleRemindStore.set(t1, r1);
+      simpleRemindStore.set(t2, r2);
+      Token token3 = simpleRemindStore.set(t3, r3);
+      simpleRemindStore.set(t4, r4);
+
+      TimePoint start = new TimePoint(1);
+      TimePoint end = new TimePoint(4);
+      Iterator<RemindRequest> iterator =
+          simpleRemindStore.iterator(
+              start, end, (RemindRequest r) -> r.getUser().getId() == u1.getId());
+
+      assertTrue(iterator.hasNext());
+      assertEquals(token1, iterator.next().getToken());
+      assertTrue(iterator.hasNext());
+      assertEquals(token3, iterator.next().getToken());
+      assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    void timePointRangeShouldBeMonotonicallyIncreased() {
+      User u1 = new User(1);
+      User u2 = new User(2);
+
+      RemindRequest r1 = new RemindRequest(u1);
+      RemindRequest r2 = new RemindRequest(u2);
+      RemindRequest r3 = new RemindRequest(u1);
+      RemindRequest r4 = new RemindRequest(u2);
+
+      TimePoint t1 = new TimePoint(1);
+      TimePoint t2 = new TimePoint(2);
+      TimePoint t3 = new TimePoint(3);
+      TimePoint t4 = new TimePoint(4);
+
+      simpleRemindStore.set(t1, r1);
+      Token token2 = simpleRemindStore.set(t2, r2);
+      simpleRemindStore.set(t3, r3);
+      Token token4 = simpleRemindStore.set(t4, r4);
+
+      TimePoint start = new TimePoint(5);
+      TimePoint end = new TimePoint(2);
+      Iterator<RemindRequest> iterator =
+          simpleRemindStore.iterator(
+              start, end, (RemindRequest r) -> r.getUser().getId() == u2.getId());
+
+      assertTrue(iterator.hasNext());
+      assertEquals(token2, iterator.next().getToken());
+      assertTrue(iterator.hasNext());
+      assertEquals(token4, iterator.next().getToken());
+      assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    void shouldReturnAllRemindRequestsIfFilterIsNotProvided() {
+      User u1 = new User(1);
+      User u2 = new User(2);
+
+      RemindRequest r1 = new RemindRequest(u1);
+      RemindRequest r2 = new RemindRequest(u2);
+      RemindRequest r3 = new RemindRequest(u1);
+      RemindRequest r4 = new RemindRequest(u2);
+
+      TimePoint t1 = new TimePoint(1);
+      TimePoint t2 = new TimePoint(2);
+      TimePoint t3 = new TimePoint(3);
+      TimePoint t4 = new TimePoint(4);
+
+      Token token1 = simpleRemindStore.set(t1, r1);
+      Token token2 = simpleRemindStore.set(t2, r2);
+      Token token3 = simpleRemindStore.set(t3, r3);
+      Token token4 = simpleRemindStore.set(t4, r4);
+
+      TimePoint start = new TimePoint(1);
+      TimePoint end = new TimePoint(5);
+      Iterator<RemindRequest> iterator = simpleRemindStore.iterator(start, end, null);
+
+      assertTrue(iterator.hasNext());
+      assertEquals(token1, iterator.next().getToken());
+      assertTrue(iterator.hasNext());
+      assertEquals(token2, iterator.next().getToken());
+      assertTrue(iterator.hasNext());
+      assertEquals(token3, iterator.next().getToken());
+      assertTrue(iterator.hasNext());
+      assertEquals(token4, iterator.next().getToken());
+      assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    void startTimePointShouldSetEarliestIfNotProvided() {
+      User u1 = new User(1);
+      User u2 = new User(2);
+
+      RemindRequest r1 = new RemindRequest(u1);
+      RemindRequest r2 = new RemindRequest(u2);
+      RemindRequest r3 = new RemindRequest(u1);
+      RemindRequest r4 = new RemindRequest(u2);
+
+      TimePoint t1 = new TimePoint(1);
+      TimePoint t2 = new TimePoint(2);
+      TimePoint t3 = new TimePoint(3);
+      TimePoint t4 = new TimePoint(4);
+
+      Token token1 = simpleRemindStore.set(t1, r1);
+      simpleRemindStore.set(t2, r2);
+      simpleRemindStore.set(t3, r3);
+      simpleRemindStore.set(t4, r4);
+
+      TimePoint end = new TimePoint(3);
+      Iterator<RemindRequest> iterator =
+          simpleRemindStore.iterator(
+              null, end, (RemindRequest r) -> r.getUser().getId() == u1.getId());
+
+      assertTrue(iterator.hasNext());
+      assertEquals(token1, iterator.next().getToken());
+      assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    void endTimePointShouldSetFarthestIfNotProvided() {
+      User u1 = new User(1);
+      User u2 = new User(2);
+
+      RemindRequest r1 = new RemindRequest(u1);
+      RemindRequest r2 = new RemindRequest(u2);
+      RemindRequest r3 = new RemindRequest(u1);
+      RemindRequest r4 = new RemindRequest(u2);
+
+      TimePoint t1 = new TimePoint(1);
+      TimePoint t2 = new TimePoint(2);
+      TimePoint t3 = new TimePoint(3);
+      TimePoint t4 = new TimePoint(4);
+
+      simpleRemindStore.set(t1, r1);
+      Token token2 = simpleRemindStore.set(t2, r2);
+      simpleRemindStore.set(t3, r3);
+      Token token4 = simpleRemindStore.set(t4, r4);
+
+      TimePoint start = new TimePoint(2);
+      Iterator<RemindRequest> iterator =
+          simpleRemindStore.iterator(
+              start, null, (RemindRequest r) -> r.getUser().getId() == u2.getId());
+
+      assertTrue(iterator.hasNext());
+      assertEquals(token2, iterator.next().getToken());
+      assertTrue(iterator.hasNext());
+      assertEquals(token4, iterator.next().getToken());
+      assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    void canIterateEmptyStore() {
+      User u1 = new User(1);
+
+      TimePoint start = new TimePoint(1);
+      TimePoint end = new TimePoint(4);
+      Iterator<RemindRequest> iterator =
+          simpleRemindStore.iterator(
+              start, end, (RemindRequest r) -> r.getUser().getId() == u1.getId());
+
+      assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    void rangeMayNotProvidedWithEmptyStore() {
+      User u1 = new User(1);
+
+      TimePoint start = new TimePoint(1);
+      TimePoint end = new TimePoint(4);
+      Iterator<RemindRequest> iterator =
+          simpleRemindStore.iterator(
+              null, null, (RemindRequest r) -> r.getUser().getId() == u1.getId());
+
+      assertFalse(iterator.hasNext());
     }
   }
 
