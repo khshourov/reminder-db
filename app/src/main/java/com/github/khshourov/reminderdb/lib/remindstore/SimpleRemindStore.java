@@ -142,9 +142,9 @@ public class SimpleRemindStore implements RemindStore {
     private RemindRequest nextRemindRequest() {
       while (this.remindRequestIterator != null) {
         while (this.remindRequestIterator.hasNext()) {
-          RemindRequest remindRequest = this.remindRequestIterator.next();
-          if (filter == null || filter.test(remindRequest)) {
-            return remindRequest;
+          RemindRequest nextCandidate = this.remindRequestIterator.next();
+          if (filter == null || filter.test(nextCandidate)) {
+            return nextCandidate;
           }
         }
 

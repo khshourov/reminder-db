@@ -36,10 +36,7 @@ public class SimpleRemindStoreTest {
   void remindStoreShouldProvideDefaultTokenBuilder() {
     RemindRequest request = new RemindRequest(user);
 
-    assertDoesNotThrow(
-        () -> {
-          this.simpleRemindStore.set(timePoint120, request);
-        });
+    assertDoesNotThrow(() -> this.simpleRemindStore.set(timePoint120, request));
   }
 
   @Nested
@@ -268,8 +265,6 @@ public class SimpleRemindStoreTest {
 
     @Test
     void canIterateEmptyStore() {
-      User u1 = new User(1);
-
       TimePoint start = new TimePoint(1);
       TimePoint end = new TimePoint(4);
       Iterator<RemindRequest> iterator =
