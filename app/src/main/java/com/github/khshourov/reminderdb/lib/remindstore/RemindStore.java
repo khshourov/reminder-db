@@ -1,6 +1,7 @@
 package com.github.khshourov.reminderdb.lib.remindstore;
 
 import com.github.khshourov.reminderdb.lib.tokenbuilder.TokenBuilder;
+import com.github.khshourov.reminderdb.lib.utils.TimePointRange;
 import com.github.khshourov.reminderdb.models.RemindRequest;
 import com.github.khshourov.reminderdb.models.TimePoint;
 import com.github.khshourov.reminderdb.models.Token;
@@ -18,5 +19,5 @@ public interface RemindStore {
 
   boolean delete(TimePoint timePoint);
 
-  Iterator<RemindRequest> iterator(TimePoint start, TimePoint end, Predicate<RemindRequest> filter);
+  Iterator<RemindRequest> iterator(TimePointRange timePointRange, Predicate<RemindRequest> filter);
 }
