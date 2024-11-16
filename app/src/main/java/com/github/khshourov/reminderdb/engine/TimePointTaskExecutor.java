@@ -5,23 +5,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TimePointTaskExecutor {
-  private final Pulser pulser;
+  private final TimePointEmitter timePointEmitter;
   private final List<TimePointTask> timePointTasks;
   private TimePoint timePoint;
 
-  public TimePointTaskExecutor(Pulser pulser) {
-    this.pulser = pulser;
-    this.pulser.registerCallback(this::handlePulse);
+  public TimePointTaskExecutor(TimePointEmitter timePointEmitter) {
+    this.timePointEmitter = timePointEmitter;
+    this.timePointEmitter.registerCallback(this::handlePulse);
     this.timePointTasks = new ArrayList<>();
     this.timePoint = new TimePoint(1);
   }
 
   public void start() {
-    this.pulser.start();
+    this.timePointEmitter.start();
   }
 
   public void stop() {
-    this.pulser.stop();
+    this.timePointEmitter.stop();
   }
 
   public void registerTimePointTask(TimePointTask timePointTask) {

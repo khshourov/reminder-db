@@ -9,32 +9,32 @@ import org.junit.jupiter.api.Test;
 
 public class TimePointTaskExecutorTest {
   TimePointTaskExecutor taskExecutor;
-  InstantPulser pulser;
+  InstantTimePointEmitter timePointEmitter;
 
   MockTimePointTask timePointTask1;
   MockTimePointTask timePointTask2;
 
   @BeforeEach
   void init() {
-    pulser = new InstantPulser();
-    taskExecutor = new TimePointTaskExecutor(pulser);
+    timePointEmitter = new InstantTimePointEmitter();
+    taskExecutor = new TimePointTaskExecutor(timePointEmitter);
 
     timePointTask1 = new MockTimePointTask();
     timePointTask2 = new MockTimePointTask();
   }
 
   @Test
-  void startingTaskExecutorShouldCallPulser() {
+  void startingTaskExecutorShouldCallTimePointEmitter() {
     taskExecutor.start();
 
-    assertTrue(pulser.startCalled);
+    assertTrue(timePointEmitter.startCalled);
   }
 
   @Test
-  void stoppingTaskExecutorShouldCallPulser() {
+  void stoppingTaskExecutorShouldCallTimePointEmitter() {
     taskExecutor.stop();
 
-    assertTrue(pulser.stopCalled);
+    assertTrue(timePointEmitter.stopCalled);
   }
 
   @Test
@@ -42,7 +42,7 @@ public class TimePointTaskExecutorTest {
     taskExecutor.registerTimePointTask(timePointTask1);
     taskExecutor.registerTimePointTask(timePointTask2);
 
-    pulser.callback();
+    timePointEmitter.emit();
 
     TimePoint expectedCalledWith = new TimePoint(1);
 
@@ -54,20 +54,20 @@ public class TimePointTaskExecutorTest {
   void eachTimePointTickShouldIncrementTimePoint() {
     taskExecutor.registerTimePointTask(timePointTask1);
 
-    pulser.callback();
+    timePointEmitter.emit();
 
     TimePoint expectedCalledWith = new TimePoint(1);
 
     assertEquals(expectedCalledWith, timePointTask1.calledWith);
 
-    pulser.callback();
+    timePointEmitter.emit();
 
     expectedCalledWith = new TimePoint(2);
 
     assertEquals(expectedCalledWith, timePointTask1.calledWith);
   }
 
-  private static class InstantPulser implements Pulser {
+  private static class InstantTimePointEmitter implements TimePointEmitter {
     public boolean startCalled;
     public boolean stopCalled;
     private Runnable callback;
@@ -87,7 +87,7 @@ public class TimePointTaskExecutorTest {
       this.callback = callback;
     }
 
-    public void callback() {
+    public void emit() {
       this.callback.run();
     }
   }

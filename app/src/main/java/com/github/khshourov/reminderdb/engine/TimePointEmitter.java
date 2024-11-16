@@ -1,6 +1,6 @@
 package com.github.khshourov.reminderdb.engine;
 
-public interface Pulser {
+public interface TimePointEmitter {
   void start();
 
   void stop();
