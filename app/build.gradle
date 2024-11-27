@@ -96,6 +96,8 @@ checkstyle {
     configFile = file('../config/checkstyle/checkstyle.xml')
 }
 
+checkstyleMain.exclude("**/$avroCodeGenerationDir/**".toString())
+
 // Directly copied from: https://github.com/diffplug/spotless/tree/main/plugin-gradle#java
 spotless {
     java {
