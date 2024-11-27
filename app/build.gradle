@@ -5,6 +5,12 @@
  * For more details on building Java & JVM projects, please refer to https://docs.gradle.org/8.10.2/userguide/building_java_projects.html in the Gradle documentation.
  */
 
+buildscript {
+    dependencies {
+        classpath libs.avro.tools
+    }
+}
+
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
@@ -30,6 +36,58 @@ dependencies {
 
     // This dependency is used by the application.
     implementation libs.guava
+
+    // Apache avro from data serialization and de-serialization
+    implementation libs.avro
+}
+
+// Apply a specific Java toolchain to ease working on different environments.
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+application {
+    // Define the main class for the application.
+    mainClass = 'org.example.App'
+}
+
+tasks.named('test') {
+    // Use JUnit Platform for unit tests.
+    useJUnitPlatform()
+}
+
+// Copied from: https://github.com/eugenp/tutorials/tree/master/gradle-modules/gradle-customization/gradle-avro
+import org.apache.avro.tool.SpecificCompilerTool
+
+def avroSchemasDir = "src/main/schema"
+def avroCodeGenerationDir = "build/generated-main-avro-schema-java"
+
+// Add the generated Avro Java code to the Gradle source files.
+sourceSets.main.java.srcDirs += [avroCodeGenerationDir]
+
+tasks.register('avroCodeGeneration') {
+    // Define the task inputs and outputs for the Gradle up-to-date checks.
+    inputs.dir(avroSchemasDir)
+    outputs.dir(avroCodeGenerationDir)
+    // The Avro code generation logs to the standard streams. Redirect the standard streams to the Gradle log.
+    logging.captureStandardOutput(LogLevel.INFO);
+    logging.captureStandardError(LogLevel.ERROR)
+    doLast {
+        new SpecificCompilerTool().run(System.in, System.out, System.err, List.of(
+                "-encoding", "UTF-8",
+                "-string",
+                "-fieldVisibility", "private",
+                "-noSetters",
+                "schema", "$projectDir/$avroSchemasDir".toString(), "$projectDir/$avroCodeGenerationDir".toString()
+        ))
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    // Make Java compilation tasks depend on the Avro code generation task.
+    dependsOn('avroCodeGeneration')
 }
 
 checkstyle {
@@ -41,6 +99,7 @@ checkstyle {
 // Directly copied from: https://github.com/diffplug/spotless/tree/main/plugin-gradle#java
 spotless {
     java {
+        targetExclude("$avroCodeGenerationDir/**/*.java".toString())
         // Use the default importOrder configuration
         importOrder()
         // optional: you can specify import groups directly
@@ -63,19 +122,6 @@ spotless {
     }
 }
 
-// Apply a specific Java toolchain to ease working on different environments.
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
-
-application {
-    // Define the main class for the application.
-    mainClass = 'org.example.App'
-}
-
-tasks.named('test') {
-    // Use JUnit Platform for unit tests.
-    useJUnitPlatform()
+tasks.named('spotlessJava') {
+    dependsOn ':app:avroCodeGeneration'
 }
