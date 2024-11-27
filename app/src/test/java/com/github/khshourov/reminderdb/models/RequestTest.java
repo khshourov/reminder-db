@@ -19,6 +19,11 @@ public class RequestTest {
   private static final String VALID_CLIENT_ID = "client-id";
   private static final ByteBuffer VALID_PAYLOAD = ByteBuffer.wrap("payload".getBytes());
 
+  @Test
+  void avroRequestShouldNotBeNull() {
+    assertThrows(IllegalArgumentException.class, () -> new Request(null));
+  }
+
   @ParameterizedTest
   @MethodSource("validRequestType")
   void requestTypeShouldBeBetween0And255(int requestType) {
@@ -28,7 +33,7 @@ public class RequestTest {
             .setClientId(VALID_CLIENT_ID)
             .setPayload(VALID_PAYLOAD)
             .build();
-    Request request = Request.fromAvroRequest(avroRequest);
+    Request request = new Request(avroRequest);
 
     assertDoesNotThrow(request::validate);
   }
@@ -46,7 +51,7 @@ public class RequestTest {
             .setClientId(VALID_CLIENT_ID)
             .setPayload(VALID_PAYLOAD)
             .build();
-    Request request = Request.fromAvroRequest(avroRequest);
+    Request request = new Request(avroRequest);
 
     assertThrows(ValidationException.class, request::validate);
   }
@@ -64,7 +69,7 @@ public class RequestTest {
             .setClientId(invalidClientId)
             .setPayload(VALID_PAYLOAD)
             .build();
-    Request request = Request.fromAvroRequest(avroRequest);
+    Request request = new Request(avroRequest);
 
     assertThrows(ValidationException.class, request::validate);
   }
@@ -81,7 +86,7 @@ public class RequestTest {
             .setClientId(VALID_CLIENT_ID)
             .setPayload(null)
             .build();
-    Request request = Request.fromAvroRequest(avroRequest);
+    Request request = new Request(avroRequest);
 
     assertDoesNotThrow(request::validate);
   }
@@ -94,8 +99,8 @@ public class RequestTest {
             .setClientId(VALID_CLIENT_ID)
             .setPayload(VALID_PAYLOAD)
             .build();
-    Request request = Request.fromAvroRequest(avroRequest);
+    Request request = new Request(avroRequest);
 
-    assertEquals(avroRequest, request.getAvroRequest());
+    assertEquals(avroRequest, request.avroRequest());
   }
 }

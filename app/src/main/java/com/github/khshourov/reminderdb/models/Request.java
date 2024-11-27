@@ -4,19 +4,12 @@ import com.github.khshourov.reminderdb.avro.AvroRequest;
 import com.github.khshourov.reminderdb.exceptions.ValidationException;
 import com.github.khshourov.reminderdb.interfaces.Validator;
 
-public class Request implements Validator {
-  private final AvroRequest avroRequest;
+public record Request(AvroRequest avroRequest) implements Validator {
 
-  private Request(AvroRequest avroRequest) {
-    this.avroRequest = avroRequest;
-  }
-
-  public static Request fromAvroRequest(AvroRequest avroRequest) {
-    return new Request(avroRequest);
-  }
-
-  public AvroRequest getAvroRequest() {
-    return this.avroRequest;
+  public Request {
+    if (avroRequest == null) {
+      throw new IllegalArgumentException("avroRequest can not be null");
+    }
   }
 
   @Override
