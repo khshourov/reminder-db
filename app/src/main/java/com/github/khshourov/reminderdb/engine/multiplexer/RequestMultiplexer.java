@@ -1,5 +1,6 @@
 package com.github.khshourov.reminderdb.engine.multiplexer;
 
+import com.github.khshourov.reminderdb.avro.Request;
 import com.github.khshourov.reminderdb.engine.requesthandlers.RequestHandler;
 
 public interface RequestMultiplexer {
@@ -7,6 +8,5 @@ public interface RequestMultiplexer {
 
   void start();
 
-  /** [TODO] Add a byte array as param */
-  void multiplex();
+  void multiplex(Request request);
 }
