@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "Request",
+  "namespace": "com.github.khshourov.reminderdb.avro",
+  "fields": [
+    {
+      "name": "type",
+      "type": "int"
+    },
+    {
+      "name": "payload",
+      "type": "bytes"
+    }
+  ]
+}
