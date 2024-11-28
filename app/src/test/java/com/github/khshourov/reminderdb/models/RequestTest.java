@@ -16,24 +16,28 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 public class RequestTest {
   private static final Integer VALID_TYPE = 1;
-  private static final String VALID_CLIENT_ID = "client-id";
   private static final ByteBuffer VALID_PAYLOAD = ByteBuffer.wrap("payload".getBytes());
+  private static final User VALID_USER = new User(1);
 
   @Test
   void avroRequestShouldNotBeNull() {
-    assertThrows(IllegalArgumentException.class, () -> new Request(null));
+    assertThrows(IllegalArgumentException.class, () -> new Request(null, VALID_USER));
+  }
+
+  @Test
+  void userShouldNotBeNull() {
+    AvroRequest avroRequest =
+        AvroRequest.newBuilder().setType(VALID_TYPE).setPayload(VALID_PAYLOAD).build();
+
+    assertThrows(IllegalArgumentException.class, () -> new Request(avroRequest, null));
   }
 
   @ParameterizedTest
   @MethodSource("validRequestType")
   void requestTypeShouldBeBetween0And255(int requestType) {
     AvroRequest avroRequest =
-        AvroRequest.newBuilder()
-            .setType(requestType)
-            .setClientId(VALID_CLIENT_ID)
-            .setPayload(VALID_PAYLOAD)
-            .build();
-    Request request = new Request(avroRequest);
+        AvroRequest.newBuilder().setType(requestType).setPayload(VALID_PAYLOAD).build();
+    Request request = new Request(avroRequest, VALID_USER);
 
     assertDoesNotThrow(request::validate);
   }
@@ -46,12 +50,8 @@ public class RequestTest {
   @MethodSource("invalidRequestType")
   void validateMethodShouldThrowErrorWhenTypeIsNotBetween0And255(int invalidRequestType) {
     AvroRequest avroRequest =
-        AvroRequest.newBuilder()
-            .setType(invalidRequestType)
-            .setClientId(VALID_CLIENT_ID)
-            .setPayload(VALID_PAYLOAD)
-            .build();
-    Request request = new Request(avroRequest);
+        AvroRequest.newBuilder().setType(invalidRequestType).setPayload(VALID_PAYLOAD).build();
+    Request request = new Request(avroRequest, VALID_USER);
 
     assertThrows(ValidationException.class, request::validate);
   }
@@ -60,33 +60,10 @@ public class RequestTest {
     return Stream.of(arguments(-1), arguments(256));
   }
 
-  @ParameterizedTest
-  @MethodSource("invalidClientId")
-  void clientIdShouldNotBeEmpty(String invalidClientId) {
-    AvroRequest avroRequest =
-        AvroRequest.newBuilder()
-            .setType(VALID_TYPE)
-            .setClientId(invalidClientId)
-            .setPayload(VALID_PAYLOAD)
-            .build();
-    Request request = new Request(avroRequest);
-
-    assertThrows(ValidationException.class, request::validate);
-  }
-
-  static Stream<Arguments> invalidClientId() {
-    return Stream.of(arguments(""), arguments(" "), arguments("  "));
-  }
-
   @Test
   void payloadCanBeNull() {
-    AvroRequest avroRequest =
-        AvroRequest.newBuilder()
-            .setType(VALID_TYPE)
-            .setClientId(VALID_CLIENT_ID)
-            .setPayload(null)
-            .build();
-    Request request = new Request(avroRequest);
+    AvroRequest avroRequest = AvroRequest.newBuilder().setType(VALID_TYPE).setPayload(null).build();
+    Request request = new Request(avroRequest, VALID_USER);
 
     assertDoesNotThrow(request::validate);
   }
@@ -94,12 +71,8 @@ public class RequestTest {
   @Test
   void storedAvroRequestCanBeRetrieved() {
     AvroRequest avroRequest =
-        AvroRequest.newBuilder()
-            .setType(VALID_TYPE)
-            .setClientId(VALID_CLIENT_ID)
-            .setPayload(VALID_PAYLOAD)
-            .build();
-    Request request = new Request(avroRequest);
+        AvroRequest.newBuilder().setType(VALID_TYPE).setPayload(VALID_PAYLOAD).build();
+    Request request = new Request(avroRequest, VALID_USER);
 
     assertEquals(avroRequest, request.avroRequest());
   }
