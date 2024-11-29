@@ -99,7 +99,7 @@ checkstyle {
     configFile = file('../config/checkstyle/checkstyle.xml')
 }
 
-checkstyleMain.exclude("**/$avroCodeGenerationDir/**".toString())
+checkstyleMain.exclude("com/github/khshourov/reminderdb/avro/**/*.java")
 
 // Directly copied from: https://github.com/diffplug/spotless/tree/main/plugin-gradle#java
 spotless {
