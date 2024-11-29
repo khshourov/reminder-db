@@ -9,7 +9,8 @@
     },
     {
       "name": "payload",
-      "type": ["bytes", "null"]
+      "type": ["bytes", "null"],
+      "default": null
     }
   ]
 }

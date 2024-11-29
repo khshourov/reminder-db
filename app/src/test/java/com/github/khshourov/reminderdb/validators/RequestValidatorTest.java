@@ -1,12 +1,13 @@
-package com.github.khshourov.reminderdb.models;
+package com.github.khshourov.reminderdb.validators;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import com.github.khshourov.reminderdb.avro.AvroRequest;
 import com.github.khshourov.reminderdb.exceptions.ValidationException;
+import com.github.khshourov.reminderdb.models.Request;
+import com.github.khshourov.reminderdb.models.User;
 import java.nio.ByteBuffer;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -14,14 +15,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class RequestTest {
+public class RequestValidatorTest {
   private static final Integer VALID_TYPE = 1;
   private static final ByteBuffer VALID_PAYLOAD = ByteBuffer.wrap("payload".getBytes());
   private static final User VALID_USER = new User(1);
 
+  private final RequestValidator requestValidator = new RequestValidator();
+
   @Test
   void avroRequestShouldNotBeNull() {
-    assertThrows(IllegalArgumentException.class, () -> new Request(null, VALID_USER));
+    assertThrows(
+        ValidationException.class, () -> requestValidator.validate(new Request(null, VALID_USER)));
   }
 
   @Test
@@ -29,7 +33,8 @@ public class RequestTest {
     AvroRequest avroRequest =
         AvroRequest.newBuilder().setType(VALID_TYPE).setPayload(VALID_PAYLOAD).build();
 
-    assertThrows(IllegalArgumentException.class, () -> new Request(avroRequest, null));
+    assertThrows(
+        ValidationException.class, () -> requestValidator.validate(new Request(avroRequest, null)));
   }
 
   @ParameterizedTest
@@ -39,7 +44,7 @@ public class RequestTest {
         AvroRequest.newBuilder().setType(requestType).setPayload(VALID_PAYLOAD).build();
     Request request = new Request(avroRequest, VALID_USER);
 
-    assertDoesNotThrow(request::validate);
+    assertDoesNotThrow(() -> requestValidator.validate(request));
   }
 
   static Stream<Arguments> validRequestType() {
@@ -53,27 +58,10 @@ public class RequestTest {
         AvroRequest.newBuilder().setType(invalidRequestType).setPayload(VALID_PAYLOAD).build();
     Request request = new Request(avroRequest, VALID_USER);
 
-    assertThrows(ValidationException.class, request::validate);
+    assertThrows(ValidationException.class, () -> requestValidator.validate(request));
   }
 
   static Stream<Arguments> invalidRequestType() {
     return Stream.of(arguments(-1), arguments(256));
-  }
-
-  @Test
-  void payloadCanBeNull() {
-    AvroRequest avroRequest = AvroRequest.newBuilder().setType(VALID_TYPE).setPayload(null).build();
-    Request request = new Request(avroRequest, VALID_USER);
-
-    assertDoesNotThrow(request::validate);
-  }
-
-  @Test
-  void storedAvroRequestCanBeRetrieved() {
-    AvroRequest avroRequest =
-        AvroRequest.newBuilder().setType(VALID_TYPE).setPayload(VALID_PAYLOAD).build();
-    Request request = new Request(avroRequest, VALID_USER);
-
-    assertEquals(avroRequest, request.avroRequest());
   }
 }
