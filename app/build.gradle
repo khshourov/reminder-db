@@ -39,6 +39,9 @@ dependencies {
 
     // Apache avro from data serialization and de-serialization
     implementation libs.avro
+
+    // To parse, migrate and validate avro.Schedule.expression
+    implementation libs.cron.utils
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
