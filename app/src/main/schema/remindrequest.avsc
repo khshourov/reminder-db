@@ -41,26 +41,36 @@
         "default": 1
       },
       {
+        "name": "userId",
+        "type": ["int", "null"]
+      },
+      {
         "name": "scheduleId",
         "type": "int",
         "default": 0
       },
       {
         "name": "insertAt",
-        "type": "int",
-        "logicalType": "date",
+        "type": {
+          "type": "int",
+          "logicalType": "date"
+        },
         "default": 0
       },
       {
         "name": "updateAt",
-        "type": "int",
-        "logicalType": "date",
+        "type": {
+          "type": "int",
+          "logicalType": "date"
+        },
         "default": 0
       },
       {
         "name": "nextRemindAt",
-        "type": "int",
-        "logicalType": "date",
+        "type": {
+          "type": "int",
+          "logicalType": "date"
+        },
         "default": 0
       },
       {
