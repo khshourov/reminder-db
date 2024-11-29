@@ -1,0 +1,73 @@
+[
+  {
+    "type": "record",
+    "name": "AvroSchedule",
+    "namespace": "com.github.khshourov.reminderdb.avro",
+    "fields": [
+      {
+        "name": "expression",
+        "type": "string"
+      },
+      {
+        "name": "remainingReminder",
+        "type": "int",
+        "default": 1
+      }
+    ]
+  },
+  {
+    "type": "record",
+    "name": "AvroRemindRequest",
+    "namespace": "com.github.khshourov.reminderdb.avro",
+    "fields": [
+      {
+        "name": "context",
+        "type": "bytes"
+      },
+      {
+        "name": "schedules",
+        "type": {
+          "type": "array",
+          "items": "AvroSchedule"
+        }
+      },
+      {
+        "name": "token",
+        "type": ["string", "null"]
+      },
+      {
+        "name": "priority",
+        "type": "int",
+        "default": 1
+      },
+      {
+        "name": "scheduleId",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "insertAt",
+        "type": "int",
+        "logicalType": "date",
+        "default": 0
+      },
+      {
+        "name": "updateAt",
+        "type": "int",
+        "logicalType": "date",
+        "default": 0
+      },
+      {
+        "name": "nextRemindAt",
+        "type": "int",
+        "logicalType": "date",
+        "default": 0
+      },
+      {
+        "name": "retryAttempted",
+        "type": "int",
+        "default": 0
+      }
+    ]
+  }
+]
