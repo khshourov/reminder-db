@@ -12,10 +12,6 @@ import com.github.khshourov.reminderdb.models.Schedule;
 public class ScheduleValidator implements Validator<Schedule> {
   @Override
   public void validate(Schedule schedule) throws ValidationException {
-    if (schedule.avroSchedule() == null) {
-      throw new ValidationException("avroSchedule can not be null");
-    }
-
     try {
       CronDefinition cronDefinition = CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ);
       CronParser expressionParser = new CronParser(cronDefinition);

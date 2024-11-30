@@ -19,15 +19,6 @@ public class ScheduleValidatorTest {
   private final ScheduleValidator scheduleValidator = new ScheduleValidator();
 
   @Test
-  void avroScheduleCanNotBeNull() {
-    Schedule schedule = new Schedule(null);
-
-    Exception exception =
-        assertThrows(ValidationException.class, () -> scheduleValidator.validate(schedule));
-    assertEquals("avroSchedule can not be null", exception.getMessage());
-  }
-
-  @Test
   void validExpressionShouldNotThrowException() {
     AvroSchedule avroSchedule = AvroSchedule.newBuilder().setExpression(VALID_EXPRESSION).build();
     Schedule schedule = new Schedule(avroSchedule);
