@@ -49,4 +49,21 @@ public class Schedule {
 
     return true;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof Schedule other)) {
+      return false;
+    }
+
+    if (!this.avroSchedule.getExpression().equals(other.avroSchedule.getExpression())) {
+      return false;
+    }
+
+    if (this.avroSchedule.getTotalReminders() != other.avroSchedule.getTotalReminders()) {
+      return false;
+    }
+
+    return this.remainingReminders == other.remainingReminders;
+  }
 }

@@ -1,10 +1,13 @@
 package com.github.khshourov.reminderdb.validators;
 
 import com.github.khshourov.reminderdb.avro.AvroRemindRequest;
+import com.github.khshourov.reminderdb.avro.AvroSchedule;
 import com.github.khshourov.reminderdb.exceptions.ValidationException;
 import com.github.khshourov.reminderdb.interfaces.Validator;
 
 public class AvroRemindRequestValidator implements Validator<AvroRemindRequest> {
+  private AvroScheduleValidator avroScheduleValidator = new AvroScheduleValidator();
+
   @Override
   public void validate(AvroRemindRequest avroRemindRequest) throws ValidationException {
     if (avroRemindRequest == null) {
@@ -17,6 +20,10 @@ public class AvroRemindRequestValidator implements Validator<AvroRemindRequest> 
 
     if (avroRemindRequest.getSchedules().isEmpty()) {
       throw new ValidationException("schedules length should be greater or equal than 1");
+    }
+
+    for (AvroSchedule avroSchedule : avroRemindRequest.getSchedules()) {
+      avroScheduleValidator.validate(avroSchedule);
     }
 
     if (avroRemindRequest.getToken() != null && avroRemindRequest.getToken().trim().isEmpty()) {

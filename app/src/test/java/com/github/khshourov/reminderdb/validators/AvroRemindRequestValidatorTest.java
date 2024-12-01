@@ -62,6 +62,21 @@ public class AvroRemindRequestValidatorTest {
     assertEquals("schedules length should be greater or equal than 1", exception.getMessage());
   }
 
+  @Test
+  void invalidSchedulesShouldThrowException() {
+    AvroSchedule invalidSchedule = AvroSchedule.newBuilder().setExpression("").build();
+
+    AvroRemindRequest avroRemindRequest =
+        AvroRemindRequest.newBuilder()
+            .setContext(ByteBuffer.allocate(1))
+            .setSchedules(List.of(schedule1, invalidSchedule))
+            .build();
+
+    Exception exception =
+        assertThrows(ValidationException.class, () -> validator.validate(avroRemindRequest));
+    assertEquals("Empty expression!", exception.getMessage());
+  }
+
   @ParameterizedTest
   @MethodSource("invalidToken")
   void tokenLengthShouldBeGreaterOrEqualThanOne(String token) {

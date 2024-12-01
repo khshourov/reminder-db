@@ -8,6 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.github.khshourov.reminderdb.avro.AvroRemindRequest;
+import com.github.khshourov.reminderdb.avro.AvroSchedule;
+import com.github.khshourov.reminderdb.exceptions.ValidationException;
 import com.github.khshourov.reminderdb.lib.tokenbuilder.TokenBuilder;
 import com.github.khshourov.reminderdb.lib.tokenbuilder.UuidTokenBuilder;
 import com.github.khshourov.reminderdb.lib.utils.TimePointRange;
@@ -15,26 +18,37 @@ import com.github.khshourov.reminderdb.models.RemindRequest;
 import com.github.khshourov.reminderdb.models.TimePoint;
 import com.github.khshourov.reminderdb.models.Token;
 import com.github.khshourov.reminderdb.models.User;
+import java.nio.ByteBuffer;
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Predicate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 public class SimpleRemindStoreTest {
-  final TimePoint timePoint120 = new TimePoint(120);
-  RemindStore simpleRemindStore;
-  User user;
+  private static final String VALID_EXPRESSION = "0 0/5 9-17 15W 1/2 ? 2023-2025";
+  private final TimePoint timePoint120 = new TimePoint(120);
+  private RemindStore simpleRemindStore;
+  private User user;
+  private AvroRemindRequest validAvroRemindRequest;
 
   @BeforeEach
   void init() {
     this.simpleRemindStore = new SimpleRemindStore();
     this.user = new User(1);
+
+    validAvroRemindRequest =
+        AvroRemindRequest.newBuilder()
+            .setContext(ByteBuffer.allocate(1))
+            .setSchedules(
+                List.of(AvroSchedule.newBuilder().setExpression(VALID_EXPRESSION).build()))
+            .build();
   }
 
   @Test
-  void remindStoreShouldProvideDefaultTokenBuilder() {
-    RemindRequest request = new RemindRequest(user);
+  void remindStoreShouldProvideDefaultTokenBuilder() throws ValidationException {
+    RemindRequest request = RemindRequest.createFrom(validAvroRemindRequest, user);
 
     assertDoesNotThrow(() -> this.simpleRemindStore.set(timePoint120, request));
   }
@@ -42,9 +56,9 @@ public class SimpleRemindStoreTest {
   @Nested
   class WhenSetTokenBuilder {
     @Test
-    void setTokenBuilderMethodShouldUpdateTheTokenBuilder() {
+    void setTokenBuilderMethodShouldUpdateTheTokenBuilder() throws ValidationException {
       TokenBuilder tokenBuilder = new FixedTokenBuilder();
-      RemindRequest request = new RemindRequest(user);
+      RemindRequest request = RemindRequest.createFrom(validAvroRemindRequest, user);
 
       simpleRemindStore.setTokenBuilder(tokenBuilder);
 
@@ -57,8 +71,8 @@ public class SimpleRemindStoreTest {
   @Nested
   class WhenSet {
     @Test
-    void remindRequestShouldBeAddedToTimePoint() {
-      RemindRequest request = new RemindRequest(user);
+    void remindRequestShouldBeAddedToTimePoint() throws ValidationException {
+      RemindRequest request = RemindRequest.createFrom(validAvroRemindRequest, user);
 
       Token token = simpleRemindStore.set(timePoint120, request);
 
@@ -67,9 +81,9 @@ public class SimpleRemindStoreTest {
     }
 
     @Test
-    void twoDifferentRequestShouldCreateTwoDifferentToken() {
-      RemindRequest request1 = new RemindRequest(user);
-      RemindRequest request2 = new RemindRequest(user);
+    void twoDifferentRequestShouldCreateTwoDifferentToken() throws ValidationException {
+      RemindRequest request1 = RemindRequest.createFrom(validAvroRemindRequest, user);
+      RemindRequest request2 = RemindRequest.createFrom(validAvroRemindRequest, user);
 
       Token token1 = simpleRemindStore.set(timePoint120, request1);
       Token token2 = simpleRemindStore.set(timePoint120, request2);
@@ -81,8 +95,9 @@ public class SimpleRemindStoreTest {
   @Nested
   class WhenGet {
     @Test
-    void previouslyStoredRemindRequestShouldBeFetchedIfValidTokenIsProvided() {
-      RemindRequest request = new RemindRequest(user);
+    void previouslyStoredRemindRequestShouldBeFetchedIfValidTokenIsProvided()
+        throws ValidationException {
+      RemindRequest request = RemindRequest.createFrom(validAvroRemindRequest, user);
 
       Token token = simpleRemindStore.set(timePoint120, request);
 
@@ -104,8 +119,9 @@ public class SimpleRemindStoreTest {
   @Nested
   class WhenDelete {
     @Test
-    void previouslyStoredRemindRequestShouldBeDeletedIfTokenIsProvided() {
-      RemindRequest request = new RemindRequest(user);
+    void previouslyStoredRemindRequestShouldBeDeletedIfTokenIsProvided()
+        throws ValidationException {
+      RemindRequest request = RemindRequest.createFrom(validAvroRemindRequest, user);
 
       Token token = simpleRemindStore.set(timePoint120, request);
 
@@ -125,9 +141,10 @@ public class SimpleRemindStoreTest {
     }
 
     @Test
-    void previouslyStoredRemindRequestsShouldBeDeletedIfTimePointIsProvided() {
-      RemindRequest request1 = new RemindRequest(user);
-      RemindRequest request2 = new RemindRequest(user);
+    void previouslyStoredRemindRequestsShouldBeDeletedIfTimePointIsProvided()
+        throws ValidationException {
+      RemindRequest request1 = RemindRequest.createFrom(validAvroRemindRequest, user);
+      RemindRequest request2 = RemindRequest.createFrom(validAvroRemindRequest, user);
 
       Token token1 = simpleRemindStore.set(timePoint120, request1);
       Token token2 = simpleRemindStore.set(timePoint120, request2);
@@ -153,10 +170,10 @@ public class SimpleRemindStoreTest {
     User u1 = new User(1);
     User u2 = new User(2);
 
-    RemindRequest r1 = new RemindRequest(u1);
-    RemindRequest r2 = new RemindRequest(u2);
-    RemindRequest r3 = new RemindRequest(u1);
-    RemindRequest r4 = new RemindRequest(u2);
+    RemindRequest r1;
+    RemindRequest r2;
+    RemindRequest r3;
+    RemindRequest r4;
 
     TimePoint t1 = new TimePoint(1);
     TimePoint t2 = new TimePoint(2);
@@ -167,6 +184,14 @@ public class SimpleRemindStoreTest {
         (RemindRequest remindRequest) -> remindRequest.getUser().getId() == u1.getId();
     Predicate<RemindRequest> user2Filter =
         (RemindRequest remindRequest) -> remindRequest.getUser().getId() == u2.getId();
+
+    @BeforeEach
+    void init() throws ValidationException {
+      r1 = RemindRequest.createFrom(validAvroRemindRequest, u1);
+      r2 = RemindRequest.createFrom(validAvroRemindRequest, u2);
+      r3 = RemindRequest.createFrom(validAvroRemindRequest, u1);
+      r4 = RemindRequest.createFrom(validAvroRemindRequest, u2);
+    }
 
     @Test
     void remindRequestsShouldBeReturnedWhenTwoTimePointsGiven() {

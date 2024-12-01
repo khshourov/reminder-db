@@ -2,6 +2,7 @@ package com.github.khshourov.reminderdb.models;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -61,5 +62,33 @@ public class ScheduleTest {
     assertEquals(VALID_EXPRESSION, schedule.getExpression());
     assertEquals(1, schedule.getTotalReminders());
     assertEquals(1, schedule.getRemainingReminders());
+  }
+
+  @Test
+  void twoScheduleShouldBeEqualIfContainsSameValue() throws ValidationException {
+    AvroSchedule avroSchedule1 =
+        AvroSchedule.newBuilder().setExpression(VALID_EXPRESSION).setTotalReminders(1).build();
+    AvroSchedule avroSchedule2 =
+        AvroSchedule.newBuilder().setExpression(VALID_EXPRESSION).setTotalReminders(1).build();
+
+    Schedule schedule1 = Schedule.createFrom(avroSchedule1);
+    Schedule schedule2 = Schedule.createFrom(avroSchedule2);
+
+    assertEquals(schedule1, schedule2);
+  }
+
+  @Test
+  void twoDifferentScheduleShouldNotBeEqual() throws ValidationException {
+    AvroSchedule avroSchedule1 =
+        AvroSchedule.newBuilder().setExpression(VALID_EXPRESSION).setTotalReminders(1).build();
+    AvroSchedule avroSchedule2 =
+        AvroSchedule.newBuilder().setExpression(VALID_EXPRESSION).setTotalReminders(2).build();
+
+    Schedule schedule1 = Schedule.createFrom(avroSchedule1);
+    Schedule schedule2 = Schedule.createFrom(avroSchedule2);
+
+    assertNotEquals(schedule1, schedule2);
+    assertNotEquals(null, schedule1);
+    assertNotEquals(new Object(), schedule1);
   }
 }
