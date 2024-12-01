@@ -12,11 +12,6 @@
         "name": "totalReminders",
         "type": "int",
         "default": 1
-      },
-      {
-        "name": "remainingReminders",
-        "type": "int",
-        "default": 1
       }
     ]
   },

@@ -1,36 +1,52 @@
 package com.github.khshourov.reminderdb.models;
 
 import com.github.khshourov.reminderdb.avro.AvroSchedule;
+import com.github.khshourov.reminderdb.exceptions.ValidationException;
+import com.github.khshourov.reminderdb.validators.AvroScheduleValidator;
 
 public class Schedule {
-  private AvroSchedule avroSchedule;
+  private static final AvroScheduleValidator validator = new AvroScheduleValidator();
+  private final AvroSchedule avroSchedule;
+  private int remainingReminders;
 
-  public Schedule(AvroSchedule avroSchedule) {
+  private Schedule(AvroSchedule avroSchedule) {
     assert avroSchedule != null;
 
-    this.avroSchedule =
-        AvroSchedule.newBuilder(avroSchedule)
-            .setRemainingReminders(avroSchedule.getTotalReminders())
-            .build();
+    this.avroSchedule = avroSchedule;
   }
 
-  public AvroSchedule avroSchedule() {
-    return this.avroSchedule;
+  public static Schedule createFrom(AvroSchedule avroSchedule) throws ValidationException {
+    validator.validate(avroSchedule);
+
+    Schedule schedule = new Schedule(avroSchedule);
+    schedule.remainingReminders = avroSchedule.getTotalReminders();
+
+    return schedule;
+  }
+
+  public String getExpression() {
+    return this.avroSchedule.getExpression();
+  }
+
+  public int getTotalReminders() {
+    return this.avroSchedule.getTotalReminders();
+  }
+
+  public int getRemainingReminders() {
+    return this.remainingReminders;
   }
 
   public boolean decreaseRemainingReminders() {
-    if (this.avroSchedule.getRemainingReminders() == -1) {
+    if (this.remainingReminders == -1) {
       return true;
     }
 
-    if (this.avroSchedule.getRemainingReminders() == 0) {
+    if (this.remainingReminders == 0) {
       return false;
     }
 
-    this.avroSchedule =
-        AvroSchedule.newBuilder(this.avroSchedule)
-            .setRemainingReminders(this.avroSchedule.getRemainingReminders() - 1)
-            .build();
+    this.remainingReminders = this.remainingReminders - 1;
+
     return true;
   }
 }

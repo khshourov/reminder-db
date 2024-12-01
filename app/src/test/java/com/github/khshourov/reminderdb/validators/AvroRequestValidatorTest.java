@@ -7,8 +7,6 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import com.github.khshourov.reminderdb.avro.AvroRequest;
 import com.github.khshourov.reminderdb.exceptions.ValidationException;
-import com.github.khshourov.reminderdb.models.Request;
-import com.github.khshourov.reminderdb.models.User;
 import java.nio.ByteBuffer;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -16,34 +14,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class RequestValidatorTest {
-  private static final Integer VALID_TYPE = 1;
+public class AvroRequestValidatorTest {
   private static final ByteBuffer VALID_PAYLOAD = ByteBuffer.wrap("payload".getBytes());
-  private static final User VALID_USER = new User(1);
 
-  private final RequestValidator requestValidator = new RequestValidator();
+  private final AvroRequestValidator requestValidator = new AvroRequestValidator();
 
   @Test
   void avroRequestShouldNotBeNull() {
     Exception exception =
-        assertThrows(
-            ValidationException.class,
-            () -> requestValidator.validate(new Request(null, VALID_USER)));
+        assertThrows(ValidationException.class, () -> requestValidator.validate(null));
 
     assertEquals("avroRequest can not be null", exception.getMessage());
-  }
-
-  @Test
-  void userShouldNotBeNull() {
-    AvroRequest avroRequest =
-        AvroRequest.newBuilder().setType(VALID_TYPE).setPayload(VALID_PAYLOAD).build();
-
-    Exception exception =
-        assertThrows(
-            ValidationException.class,
-            () -> requestValidator.validate(new Request(avroRequest, null)));
-
-    assertEquals("user can not be null", exception.getMessage());
   }
 
   @ParameterizedTest
@@ -51,9 +32,8 @@ public class RequestValidatorTest {
   void requestTypeShouldBeBetween0And255(int requestType) {
     AvroRequest avroRequest =
         AvroRequest.newBuilder().setType(requestType).setPayload(VALID_PAYLOAD).build();
-    Request request = new Request(avroRequest, VALID_USER);
 
-    assertDoesNotThrow(() -> requestValidator.validate(request));
+    assertDoesNotThrow(() -> requestValidator.validate(avroRequest));
   }
 
   static Stream<Arguments> validRequestType() {
@@ -65,10 +45,9 @@ public class RequestValidatorTest {
   void validateMethodShouldThrowErrorWhenTypeIsNotBetween0And255(int invalidRequestType) {
     AvroRequest avroRequest =
         AvroRequest.newBuilder().setType(invalidRequestType).setPayload(VALID_PAYLOAD).build();
-    Request request = new Request(avroRequest, VALID_USER);
 
     Exception exception =
-        assertThrows(ValidationException.class, () -> requestValidator.validate(request));
+        assertThrows(ValidationException.class, () -> requestValidator.validate(avroRequest));
 
     assertEquals("type should be between 0 and 255", exception.getMessage());
   }

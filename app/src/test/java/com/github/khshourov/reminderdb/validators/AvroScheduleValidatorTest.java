@@ -7,33 +7,38 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import com.github.khshourov.reminderdb.avro.AvroSchedule;
 import com.github.khshourov.reminderdb.exceptions.ValidationException;
-import com.github.khshourov.reminderdb.models.Schedule;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class ScheduleValidatorTest {
+public class AvroScheduleValidatorTest {
   private final String VALID_EXPRESSION = "0 0/5 9-17 15W 1/2 ? 2023-2025";
-  private final ScheduleValidator scheduleValidator = new ScheduleValidator();
+  private final AvroScheduleValidator scheduleValidator = new AvroScheduleValidator();
+
+  @Test
+  void nullAvroScheduleShouldThrowException() {
+    Exception exception =
+        assertThrows(ValidationException.class, () -> scheduleValidator.validate(null));
+
+    assertEquals("avroSchedule can not be null", exception.getMessage());
+  }
 
   @Test
   void validExpressionShouldNotThrowException() {
     AvroSchedule avroSchedule = AvroSchedule.newBuilder().setExpression(VALID_EXPRESSION).build();
-    Schedule schedule = new Schedule(avroSchedule);
 
-    assertDoesNotThrow(() -> scheduleValidator.validate(schedule));
+    assertDoesNotThrow(() -> scheduleValidator.validate(avroSchedule));
   }
 
   @ParameterizedTest
   @MethodSource("invalidExpressions")
   void invalidScheduleExpressionShouldThrowException(String expression, String exceptionMessage) {
     AvroSchedule avroSchedule = AvroSchedule.newBuilder().setExpression(expression).build();
-    Schedule schedule = new Schedule(avroSchedule);
 
     Exception exception =
-        assertThrows(ValidationException.class, () -> scheduleValidator.validate(schedule));
+        assertThrows(ValidationException.class, () -> scheduleValidator.validate(avroSchedule));
     assertEquals(exceptionMessage, exception.getMessage());
   }
 
@@ -45,9 +50,8 @@ public class ScheduleValidatorTest {
             .setExpression(VALID_EXPRESSION)
             .setTotalReminders(validTotalReminders)
             .build();
-    Schedule schedule = new Schedule(avroSchedule);
 
-    assertDoesNotThrow(() -> scheduleValidator.validate(schedule));
+    assertDoesNotThrow(() -> scheduleValidator.validate(avroSchedule));
   }
 
   @ParameterizedTest
@@ -58,10 +62,9 @@ public class ScheduleValidatorTest {
             .setExpression(VALID_EXPRESSION)
             .setTotalReminders(invalidTotalReminders)
             .build();
-    Schedule schedule = new Schedule(avroSchedule);
 
     Exception exception =
-        assertThrows(ValidationException.class, () -> scheduleValidator.validate(schedule));
+        assertThrows(ValidationException.class, () -> scheduleValidator.validate(avroSchedule));
     assertEquals("totalReminders should be between 1 and 2147483647 or -1", exception.getMessage());
   }
 

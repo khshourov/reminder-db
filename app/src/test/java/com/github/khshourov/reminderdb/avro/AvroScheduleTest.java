@@ -16,6 +16,5 @@ public class AvroScheduleTest {
     AvroSchedule avroSchedule =
         AvroSchedule.newBuilder().setExpression(VALID_SCHEDULE_EXPRESSION).build();
     assertEquals(1, avroSchedule.getTotalReminders());
-    assertEquals(1, avroSchedule.getRemainingReminders());
   }
 }
