@@ -18,7 +18,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 public class AvroRemindRequestValidatorTest {
   private static final String VALID_EXPRESSION = "0 0/5 9-17 15W 1/2 ? 2023-2025";
-  private static final String VALID_TOKEN = "valid-token";
   private AvroSchedule schedule1;
   private AvroSchedule schedule2;
   private ByteBuffer validContext;
