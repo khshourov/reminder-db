@@ -14,6 +14,7 @@ public class RemindRequest {
 
   private int scheduleId;
   private final int insertAt;
+  private int updateAt;
   private int nextRemindAt;
   private int retryAttempted;
 
@@ -83,6 +84,10 @@ public class RemindRequest {
 
   public int getInsertAt() {
     return this.insertAt;
+  }
+
+  public int getUpdateAt() {
+    return this.updateAt;
   }
 
   public int getNextRemindAt() {
