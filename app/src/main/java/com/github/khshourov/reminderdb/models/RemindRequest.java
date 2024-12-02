@@ -6,6 +6,7 @@ import com.github.khshourov.reminderdb.interfaces.TimeService;
 import com.github.khshourov.reminderdb.validators.AvroRemindRequestValidator;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Optional;
 
 public class RemindRequest {
   private static final AvroRemindRequestValidator validator = new AvroRemindRequestValidator();
@@ -17,9 +18,10 @@ public class RemindRequest {
 
   private Token token;
 
+  private final List<Schedule> schedules;
   private int scheduleId;
   private final long insertAt;
-  private long updateAt;
+  private final long updateAt;
   private long nextRemindAt;
   private int retryAttempted;
 
@@ -29,9 +31,21 @@ public class RemindRequest {
     this.avroRemindRequest = avroRemindRequest;
     this.user = user;
 
+    this.schedules =
+        avroRemindRequest.getSchedules().stream()
+            .map(
+                (avroSchedule -> {
+                  try {
+                    return Schedule.createFrom(avroSchedule);
+                  } catch (ValidationException e) {
+                    throw new RuntimeException(e);
+                  }
+                }))
+            .toList();
     this.token = new Token(avroRemindRequest.getToken());
     this.insertAt = timeService.getCurrentEpochSecond();
     this.updateAt = timeService.getCurrentEpochSecond();
+    this.nextRemindAt = timeService.getCurrentEpochSecond();
   }
 
   public static RemindRequest createFrom(
@@ -51,16 +65,7 @@ public class RemindRequest {
   }
 
   public List<Schedule> getSchedules() {
-    return this.avroRemindRequest.getSchedules().stream()
-        .map(
-            (avroSchedule -> {
-              try {
-                return Schedule.createFrom(avroSchedule);
-              } catch (ValidationException e) {
-                throw new RuntimeException(e);
-              }
-            }))
-        .toList();
+    return this.schedules;
   }
 
   public Token getToken() {
@@ -79,16 +84,29 @@ public class RemindRequest {
     this.token = token;
   }
 
-  public int getScheduleId() {
-    return this.scheduleId;
-  }
-
   public long getInsertAt() {
     return this.insertAt;
   }
 
   public long getUpdateAt() {
     return this.updateAt;
+  }
+
+  public Optional<Long> refreshNextRemindAt() {
+    while (this.scheduleId < this.schedules.size()) {
+      Optional<Long> nextSchedule =
+          this.schedules
+              .get(this.scheduleId)
+              .getNextSchedule(this.nextRemindAt, this.timeService.getCurrentEpochSecond());
+      if (nextSchedule.isPresent()) {
+        this.nextRemindAt = nextSchedule.get();
+        return Optional.of(this.nextRemindAt);
+      }
+
+      this.scheduleId = this.scheduleId + 1;
+    }
+
+    return Optional.empty();
   }
 
   public long getNextRemindAt() {

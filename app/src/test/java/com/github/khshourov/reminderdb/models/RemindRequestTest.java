@@ -13,6 +13,7 @@ import com.github.khshourov.reminderdb.interfaces.TimeService;
 import com.github.khshourov.reminderdb.testlib.FixedTimeService;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -84,10 +85,9 @@ public class RemindRequestTest {
     RemindRequest remindRequest =
         RemindRequest.createFrom(validAvroRemindRequest, user, timeService);
 
-    assertEquals(0, remindRequest.getScheduleId());
     assertEquals(timeService.getCurrentEpochSecond(), remindRequest.getInsertAt());
     assertEquals(timeService.getCurrentEpochSecond(), remindRequest.getUpdateAt());
-    assertEquals(0, remindRequest.getNextRemindAt());
+    assertEquals(timeService.getCurrentEpochSecond(), remindRequest.getNextRemindAt());
     assertEquals(0, remindRequest.getRetryAttempted());
   }
 
@@ -114,5 +114,33 @@ public class RemindRequestTest {
     remindRequest.clearRetryAttempted();
 
     assertEquals(0, remindRequest.getRetryAttempted());
+  }
+
+  @Test
+  void nextExecutionTimeKeepsGeneratingUntilNoScheduleIsLeft() throws ValidationException {
+    AvroSchedule schedule1 =
+        AvroSchedule.newBuilder().setExpression("0 * * * * ?").setTotalReminders(1).build();
+    AvroSchedule schedule2 =
+        AvroSchedule.newBuilder().setExpression("0 * * * * ?").setTotalReminders(1).build();
+
+    RemindRequest remindRequest =
+        RemindRequest.createFrom(
+            AvroRemindRequest.newBuilder()
+                .setContext(VALID_CONTEXT)
+                .setSchedules(List.of(schedule1, schedule2))
+                .build(),
+            user,
+            timeService);
+
+    Optional<Long> nextRemindAt = remindRequest.refreshNextRemindAt();
+    assertTrue(nextRemindAt.isPresent());
+    assertEquals(60, nextRemindAt.get() - timeService.getCurrentEpochSecond());
+
+    nextRemindAt = remindRequest.refreshNextRemindAt();
+    assertTrue(nextRemindAt.isPresent());
+    assertEquals(120, nextRemindAt.get() - timeService.getCurrentEpochSecond());
+
+    nextRemindAt = remindRequest.refreshNextRemindAt();
+    assertFalse(nextRemindAt.isPresent());
   }
 }
