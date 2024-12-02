@@ -13,9 +13,9 @@ public class RemindRequest {
   private Token token;
 
   private int scheduleId;
-  private final int insertAt;
-  private int updateAt;
-  private int nextRemindAt;
+  private final long insertAt;
+  private long updateAt;
+  private long nextRemindAt;
   private int retryAttempted;
 
   private RemindRequest(AvroRemindRequest avroRemindRequest, User user) {
@@ -82,15 +82,15 @@ public class RemindRequest {
     return this.scheduleId;
   }
 
-  public int getInsertAt() {
+  public long getInsertAt() {
     return this.insertAt;
   }
 
-  public int getUpdateAt() {
+  public long getUpdateAt() {
     return this.updateAt;
   }
 
-  public int getNextRemindAt() {
+  public long getNextRemindAt() {
     return this.nextRemindAt;
   }
 
