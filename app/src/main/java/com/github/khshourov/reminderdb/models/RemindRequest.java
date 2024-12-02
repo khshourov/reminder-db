@@ -30,18 +30,8 @@ public class RemindRequest {
     this.user = user;
 
     this.token = new Token(avroRemindRequest.getToken());
-    this.insertAt = 0;
-  }
-
-  private RemindRequest(
-      AvroRemindRequest avroRemindRequest, User user, int insertAt, TimeService timeService) {
-    this.timeService = timeService;
-
-    this.avroRemindRequest = avroRemindRequest;
-    this.user = user;
-
-    this.token = new Token(avroRemindRequest.getToken());
-    this.insertAt = insertAt;
+    this.insertAt = timeService.getCurrentEpochSecond();
+    this.updateAt = timeService.getCurrentEpochSecond();
   }
 
   public static RemindRequest createFrom(

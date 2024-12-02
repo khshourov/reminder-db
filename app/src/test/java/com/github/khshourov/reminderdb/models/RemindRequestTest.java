@@ -82,8 +82,8 @@ public class RemindRequestTest {
         RemindRequest.createFrom(validAvroRemindRequest, user, timeService);
 
     assertEquals(0, remindRequest.getScheduleId());
-    assertEquals(0, remindRequest.getInsertAt());
-    assertEquals(0, remindRequest.getUpdateAt());
+    assertEquals(timeService.getCurrentEpochSecond(), remindRequest.getInsertAt());
+    assertEquals(timeService.getCurrentEpochSecond(), remindRequest.getUpdateAt());
     assertEquals(0, remindRequest.getNextRemindAt());
     assertEquals(0, remindRequest.getRetryAttempted());
   }
