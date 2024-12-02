@@ -95,7 +95,20 @@ public class RemindRequest {
     return this.nextRemindAt;
   }
 
+  public boolean canRetry(int maxRetry) {
+    if ((this.retryAttempted + 1) > maxRetry) {
+      return false;
+    }
+
+    this.retryAttempted = this.retryAttempted + 1;
+    return true;
+  }
+
   public int getRetryAttempted() {
     return this.retryAttempted;
+  }
+
+  public void clearRetryAttempted() {
+    this.retryAttempted = 0;
   }
 }

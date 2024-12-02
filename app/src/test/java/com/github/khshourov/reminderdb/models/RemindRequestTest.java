@@ -1,8 +1,10 @@
 package com.github.khshourov.reminderdb.models;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.khshourov.reminderdb.avro.AvroRemindRequest;
 import com.github.khshourov.reminderdb.avro.AvroSchedule;
@@ -19,6 +21,7 @@ public class RemindRequestTest {
   private static final ByteBuffer VALID_CONTEXT = ByteBuffer.allocate(1);
   private static final String VALID_TOKEN = "valid-token";
   private static final int VALID_PRIORITY = 13;
+  private static final int MAX_RETRY = 3;
   private AvroSchedule schedule;
   private AvroRemindRequest validAvroRemindRequest;
   private User user;
@@ -85,6 +88,31 @@ public class RemindRequestTest {
     assertEquals(timeService.getCurrentEpochSecond(), remindRequest.getInsertAt());
     assertEquals(timeService.getCurrentEpochSecond(), remindRequest.getUpdateAt());
     assertEquals(0, remindRequest.getNextRemindAt());
+    assertEquals(0, remindRequest.getRetryAttempted());
+  }
+
+  @Test
+  void remindRequestCanBeRetriedUpToMaxRetry() throws ValidationException {
+    RemindRequest remindRequest =
+        RemindRequest.createFrom(validAvroRemindRequest, user, timeService);
+
+    assertTrue(remindRequest.canRetry(MAX_RETRY));
+    assertTrue(remindRequest.canRetry(MAX_RETRY));
+    assertTrue(remindRequest.canRetry(MAX_RETRY));
+    assertFalse(remindRequest.canRetry(MAX_RETRY));
+  }
+
+  @Test
+  void clearingRetryAttemptedShouldMakeItValueToZero() throws ValidationException {
+    RemindRequest remindRequest =
+        RemindRequest.createFrom(validAvroRemindRequest, user, timeService);
+    remindRequest.canRetry(MAX_RETRY);
+    remindRequest.canRetry(MAX_RETRY);
+
+    assertEquals(2, remindRequest.getRetryAttempted());
+
+    remindRequest.clearRetryAttempted();
+
     assertEquals(0, remindRequest.getRetryAttempted());
   }
 }
