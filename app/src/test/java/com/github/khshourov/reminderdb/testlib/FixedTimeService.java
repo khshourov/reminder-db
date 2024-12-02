@@ -6,11 +6,11 @@ import java.time.Instant;
 import java.time.ZoneId;
 
 public class FixedTimeService implements TimeService {
-  private static final long fixedEpochSecond = 752457600L;
+  public static final long now = 752457600L; // Friday, November 5, 1993 12:00:00 AM
   private final Clock clock;
 
   public FixedTimeService() {
-    this.clock = Clock.fixed(Instant.ofEpochSecond(fixedEpochSecond), ZoneId.systemDefault());
+    this.clock = Clock.fixed(Instant.ofEpochSecond(now), ZoneId.systemDefault());
   }
 
   @Override
