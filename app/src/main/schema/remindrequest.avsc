@@ -40,45 +40,6 @@
         "name": "priority",
         "type": "int",
         "default": 1
-      },
-      {
-        "name": "userId",
-        "type": ["int", "null"],
-        "default": null
-      },
-      {
-        "name": "scheduleId",
-        "type": "int",
-        "default": 0
-      },
-      {
-        "name": "insertAt",
-        "type": {
-          "type": "int",
-          "logicalType": "date"
-        },
-        "default": 0
-      },
-      {
-        "name": "updateAt",
-        "type": {
-          "type": "int",
-          "logicalType": "date"
-        },
-        "default": 0
-      },
-      {
-        "name": "nextRemindAt",
-        "type": {
-          "type": "int",
-          "logicalType": "date"
-        },
-        "default": 0
-      },
-      {
-        "name": "retryAttempted",
-        "type": "int",
-        "default": 0
       }
     ]
   }
