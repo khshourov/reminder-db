@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.github.khshourov.reminderdb.avro.AvroRemindRequest;
 import com.github.khshourov.reminderdb.avro.AvroSchedule;
 import com.github.khshourov.reminderdb.exceptions.ValidationException;
+import com.github.khshourov.reminderdb.interfaces.TimeService;
+import com.github.khshourov.reminderdb.testlib.FixedTimeService;
 import java.nio.ByteBuffer;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +22,7 @@ public class RemindRequestTest {
   private AvroSchedule schedule;
   private AvroRemindRequest validAvroRemindRequest;
   private User user;
+  private TimeService timeService;
 
   @BeforeEach
   void init() throws ValidationException {
@@ -32,6 +35,7 @@ public class RemindRequestTest {
             .setPriority(VALID_PRIORITY)
             .build();
     user = new User(1);
+    timeService = new FixedTimeService();
   }
 
   @Test
@@ -39,7 +43,7 @@ public class RemindRequestTest {
     Exception exception =
         assertThrows(
             ValidationException.class,
-            () -> RemindRequest.createFrom(validAvroRemindRequest, null));
+            () -> RemindRequest.createFrom(validAvroRemindRequest, null, timeService));
 
     assertEquals("user can not be null", exception.getMessage());
   }
@@ -56,14 +60,15 @@ public class RemindRequestTest {
     Exception exception =
         assertThrows(
             ValidationException.class,
-            () -> RemindRequest.createFrom(invalidAvroRemindRequest, user));
+            () -> RemindRequest.createFrom(invalidAvroRemindRequest, user, timeService));
 
     assertEquals("context length should be greater or equal than 1", exception.getMessage());
   }
 
   @Test
   void modelShouldProvideWrapperMethodsForAvroRemindRequest() throws ValidationException {
-    RemindRequest remindRequest = RemindRequest.createFrom(validAvroRemindRequest, user);
+    RemindRequest remindRequest =
+        RemindRequest.createFrom(validAvroRemindRequest, user, timeService);
 
     assertEquals(VALID_CONTEXT, remindRequest.getContext());
     assertIterableEquals(List.of(Schedule.createFrom(schedule)), remindRequest.getSchedules());
@@ -73,7 +78,8 @@ public class RemindRequestTest {
 
   @Test
   void modelShouldProvideDefaultValuesForStateVariables() throws ValidationException {
-    RemindRequest remindRequest = RemindRequest.createFrom(validAvroRemindRequest, user);
+    RemindRequest remindRequest =
+        RemindRequest.createFrom(validAvroRemindRequest, user, timeService);
 
     assertEquals(0, remindRequest.getScheduleId());
     assertEquals(0, remindRequest.getInsertAt());

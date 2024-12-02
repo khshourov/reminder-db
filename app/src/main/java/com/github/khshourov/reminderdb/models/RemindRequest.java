@@ -2,14 +2,19 @@ package com.github.khshourov.reminderdb.models;
 
 import com.github.khshourov.reminderdb.avro.AvroRemindRequest;
 import com.github.khshourov.reminderdb.exceptions.ValidationException;
+import com.github.khshourov.reminderdb.interfaces.TimeService;
 import com.github.khshourov.reminderdb.validators.AvroRemindRequestValidator;
 import java.nio.ByteBuffer;
 import java.util.List;
 
 public class RemindRequest {
   private static final AvroRemindRequestValidator validator = new AvroRemindRequestValidator();
+
+  private final TimeService timeService;
+
   private final AvroRemindRequest avroRemindRequest;
   private final User user;
+
   private Token token;
 
   private int scheduleId;
@@ -18,7 +23,9 @@ public class RemindRequest {
   private long nextRemindAt;
   private int retryAttempted;
 
-  private RemindRequest(AvroRemindRequest avroRemindRequest, User user) {
+  private RemindRequest(AvroRemindRequest avroRemindRequest, User user, TimeService timeService) {
+    this.timeService = timeService;
+
     this.avroRemindRequest = avroRemindRequest;
     this.user = user;
 
@@ -26,7 +33,10 @@ public class RemindRequest {
     this.insertAt = 0;
   }
 
-  private RemindRequest(AvroRemindRequest avroRemindRequest, User user, int insertAt) {
+  private RemindRequest(
+      AvroRemindRequest avroRemindRequest, User user, int insertAt, TimeService timeService) {
+    this.timeService = timeService;
+
     this.avroRemindRequest = avroRemindRequest;
     this.user = user;
 
@@ -34,7 +44,8 @@ public class RemindRequest {
     this.insertAt = insertAt;
   }
 
-  public static RemindRequest createFrom(AvroRemindRequest avroRemindRequest, User user)
+  public static RemindRequest createFrom(
+      AvroRemindRequest avroRemindRequest, User user, TimeService timeService)
       throws ValidationException {
     if (user == null) {
       throw new ValidationException("user can not be null");
@@ -42,7 +53,7 @@ public class RemindRequest {
 
     validator.validate(avroRemindRequest);
 
-    return new RemindRequest(avroRemindRequest, user);
+    return new RemindRequest(avroRemindRequest, user, timeService);
   }
 
   public ByteBuffer getContext() {
