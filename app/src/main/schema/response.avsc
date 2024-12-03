@@ -1,0 +1,26 @@
+{
+  "type": "record",
+  "name": "AvroResponse",
+  "namespace": "com.github.khshourov.reminderdb.avro",
+  "fields": [
+    {
+      "name": "code",
+      "type": "string"
+    },
+    {
+      "name": "title",
+      "type": ["string", "null"],
+      "default": null
+    },
+    {
+      "name": "details",
+      "type": ["string", "null"],
+      "default": null
+    },
+    {
+      "name": "data",
+      "type": ["bytes", "null"],
+      "default": null
+    }
+  ]
+}

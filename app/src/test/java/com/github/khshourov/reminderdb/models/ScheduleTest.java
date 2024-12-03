@@ -9,8 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.github.khshourov.reminderdb.avro.AvroSchedule;
 import com.github.khshourov.reminderdb.exceptions.ValidationException;
 import com.github.khshourov.reminderdb.testlib.FixedTimeService;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
@@ -104,10 +102,10 @@ public class ScheduleTest {
 
   @Test
   void nextScheduleEpochShouldBeEmptyWhenCronCanNotGenerateNewEpoch() throws ValidationException {
-    long currentSchedule = FixedTimeService.now;
+    FixedTimeService timeService = new FixedTimeService();
+    long currentSchedule = timeService.getCurrentEpochSecond();
     long now = currentSchedule;
-    long previousYear =
-        Instant.ofEpochSecond(now).atZone(ZoneId.systemDefault()).toLocalDateTime().getYear() - 1;
+    long previousYear = timeService.getYear() - 1;
 
     Schedule schedule =
         Schedule.createFrom(

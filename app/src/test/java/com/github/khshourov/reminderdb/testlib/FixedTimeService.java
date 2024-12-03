@@ -17,4 +17,8 @@ public class FixedTimeService implements TimeService {
   public long getCurrentEpochSecond() {
     return Instant.now(this.clock).getEpochSecond();
   }
+
+  public int getYear() {
+    return Instant.ofEpochSecond(now).atZone(ZoneId.systemDefault()).toLocalDateTime().getYear();
+  }
 }
