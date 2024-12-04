@@ -1,5 +1,6 @@
 package com.github.khshourov.reminderdb.lib.tokenbuilder;
 
+import com.github.khshourov.reminderdb.exceptions.ValidationException;
 import com.github.khshourov.reminderdb.models.Token;
 import com.github.khshourov.reminderdb.models.User;
 import java.util.Objects;
@@ -15,9 +16,9 @@ public class UuidTokenBuilder implements TokenBuilder {
   }
 
   @Override
-  public Token build() {
+  public Token build() throws ValidationException {
     Objects.requireNonNull(this.user);
 
-    return new Token(String.format("user-%d:%s", this.user.getId(), UUID.randomUUID()));
+    return Token.createFrom(String.format("user-%d:%s", this.user.getId(), UUID.randomUUID()));
   }
 }

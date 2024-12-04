@@ -68,7 +68,7 @@ public class SimpleRemindStoreTest {
 
       Token token = simpleRemindStore.set(timePoint120, request);
 
-      assertEquals(new Token(FixedTokenBuilder.FIXED_TOKEN), token);
+      assertEquals(Token.createFrom(FixedTokenBuilder.FIXED_TOKEN), token);
     }
   }
 
@@ -81,7 +81,7 @@ public class SimpleRemindStoreTest {
       Token token = simpleRemindStore.set(timePoint120, request);
 
       assertNotNull(token);
-      assertFalse(token.value().isEmpty());
+      assertFalse(token.getValue().isEmpty());
     }
 
     @Test
@@ -111,7 +111,7 @@ public class SimpleRemindStoreTest {
     }
 
     @Test
-    void nullShouldReturnIfTokenIsNotFound() {
+    void nullShouldReturnIfTokenIsNotFound() throws ValidationException {
       Token token = (new UuidTokenBuilder()).with(user).build();
 
       RemindRequest storedRequest = simpleRemindStore.get(token);
@@ -136,7 +136,7 @@ public class SimpleRemindStoreTest {
     }
 
     @Test
-    void falseShouldReturnIfTokenIsNotFound() {
+    void falseShouldReturnIfTokenIsNotFound() throws ValidationException {
       Token token = (new UuidTokenBuilder()).with(user).build();
 
       boolean deleted = simpleRemindStore.delete(token);
@@ -320,8 +320,8 @@ public class SimpleRemindStoreTest {
     }
 
     @Override
-    public Token build() {
-      return new Token(FIXED_TOKEN);
+    public Token build() throws ValidationException {
+      return Token.createFrom(FIXED_TOKEN);
     }
   }
 }

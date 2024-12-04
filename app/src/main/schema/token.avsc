@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "AvroToken",
+  "namespace": "com.github.khshourov.reminderdb.avro",
+  "fields": [
+    {
+      "name": "token",
+      "type": "string"
+    }
+  ]
+}

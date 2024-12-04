@@ -137,7 +137,7 @@ public class AddRequestHandlerTest {
 
     assertEquals(0, new TimePoint(60).compareTo(remindStore.getSetTimePoint()));
     assertNotNull(remindStore.getSetRemindRequest());
-    assertEquals("token", remindStore.getGivenToken().value());
+    assertEquals("token", remindStore.getGivenToken().getValue());
   }
 
   private static class MockRemindStore implements RemindStore {
@@ -152,7 +152,11 @@ public class AddRequestHandlerTest {
     public Token set(TimePoint timePoint, RemindRequest remindRequest) {
       this.setTimePoint = timePoint;
       this.setRemindRequest = remindRequest;
-      this.givenToken = new Token("token");
+      try {
+        this.givenToken = Token.createFrom("token");
+      } catch (ValidationException e) {
+        throw new RuntimeException(e);
+      }
       return this.givenToken;
     }
 

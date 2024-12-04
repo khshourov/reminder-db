@@ -1,5 +1,6 @@
 package com.github.khshourov.reminderdb.lib.remindstore;
 
+import com.github.khshourov.reminderdb.exceptions.ValidationException;
 import com.github.khshourov.reminderdb.lib.tokenbuilder.TokenBuilder;
 import com.github.khshourov.reminderdb.lib.tokenbuilder.UuidTokenBuilder;
 import com.github.khshourov.reminderdb.lib.utils.Pair;
@@ -39,7 +40,12 @@ public class SimpleRemindStore implements RemindStore {
     this.remindStore.putIfAbsent(timePoint, new UnsafeCircularList<>());
     UnsafeNode<RemindRequest> node = this.remindStore.get(timePoint).add(remindRequest);
 
-    Token token = this.tokenBuilder.with(remindRequest.getUser()).build();
+    Token token = null;
+    try {
+      token = this.tokenBuilder.with(remindRequest.getUser()).build();
+    } catch (ValidationException e) {
+      throw new RuntimeException(e);
+    }
 
     remindRequest.setToken(token);
     this.indexes.put(token, new Pair<>(timePoint, node));
