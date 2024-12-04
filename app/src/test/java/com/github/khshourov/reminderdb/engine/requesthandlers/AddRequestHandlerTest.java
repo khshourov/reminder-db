@@ -59,7 +59,7 @@ public class AddRequestHandlerTest {
 
   @Test
   void requestTypeShouldBeAddRequest() throws ValidationException, IOException {
-    AvroRequest avroRequest = new RemindRequestBuilder().withType(HandlerType.UPDATE).build();
+    AvroRequest avroRequest = new RemindRequestBuilder().withType(HandlerType.DELETE).build();
     Request request = Request.createFrom(avroRequest, user);
 
     requestHandler.handle(request);
@@ -100,21 +100,6 @@ public class AddRequestHandlerTest {
     assertEquals(ResponseType.E_0003.name(), response.payload().getCode());
     assertEquals("Payload Validation Error", response.payload().getTitle());
     assertEquals("Empty expression!", response.payload().getDetails());
-    assertNull(response.payload().getData());
-  }
-
-  @Test
-  void addRemindRequestShouldNotContainToken() throws ValidationException, IOException {
-    AvroRequest avroRequest =
-        new RemindRequestBuilder().withType(HandlerType.ADD).withToken("preset-token").build();
-    Request request = Request.createFrom(avroRequest, user);
-
-    requestHandler.handle(request);
-
-    Response response = responseHandler.getResponse();
-    assertEquals(ResponseType.E_0003.name(), response.payload().getCode());
-    assertEquals("Payload Validation Error", response.payload().getTitle());
-    assertEquals("Token can not be set in Add request", response.payload().getDetails());
     assertNull(response.payload().getData());
   }
 

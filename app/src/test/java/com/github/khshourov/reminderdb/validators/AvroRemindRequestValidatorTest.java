@@ -78,21 +78,6 @@ public class AvroRemindRequestValidatorTest {
   }
 
   @ParameterizedTest
-  @MethodSource("invalidToken")
-  void tokenLengthShouldBeGreaterOrEqualThanOne(String token) {
-    AvroRemindRequest avroRemindRequest =
-        AvroRemindRequest.newBuilder()
-            .setContext(validContext)
-            .setSchedules(List.of(schedule1))
-            .setToken(token)
-            .build();
-
-    Exception exception =
-        assertThrows(ValidationException.class, () -> validator.validate(avroRemindRequest));
-    assertEquals("token length should be greater or equal than 1", exception.getMessage());
-  }
-
-  @ParameterizedTest
   @MethodSource("invalidPriority")
   void priorityShouldBeBetween1And255(int invalidPriority) {
     AvroRemindRequest avroRemindRequest =
@@ -105,10 +90,6 @@ public class AvroRemindRequestValidatorTest {
     Exception exception =
         assertThrows(ValidationException.class, () -> validator.validate(avroRemindRequest));
     assertEquals("priority should be between 1 and 255", exception.getMessage());
-  }
-
-  static Stream<Arguments> invalidToken() {
-    return Stream.of(arguments(""), arguments(" "), arguments("  "));
   }
 
   static Stream<Arguments> invalidPriority() {

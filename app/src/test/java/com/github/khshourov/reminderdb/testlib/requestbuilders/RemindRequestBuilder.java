@@ -11,7 +11,6 @@ import java.util.List;
 public class RemindRequestBuilder {
   private int type = HandlerType.ADD.ordinal();
   private String scheduleExpression = "0 * * * * ?";
-  private String token;
   private int priority = 1;
 
   public RemindRequestBuilder withType(HandlerType type) {
@@ -21,11 +20,6 @@ public class RemindRequestBuilder {
 
   public RemindRequestBuilder withScheduleExpression(String scheduleExpression) {
     this.scheduleExpression = scheduleExpression;
-    return this;
-  }
-
-  public RemindRequestBuilder withToken(String token) {
-    this.token = token;
     return this;
   }
 
@@ -41,7 +35,6 @@ public class RemindRequestBuilder {
         AvroRemindRequest.newBuilder()
             .setContext(ByteBuffer.allocate(1))
             .setSchedules(List.of(schedule))
-            .setToken(this.token)
             .setPriority(this.priority)
             .build();
 

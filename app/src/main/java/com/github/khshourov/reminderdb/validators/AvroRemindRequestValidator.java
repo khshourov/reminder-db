@@ -26,10 +26,6 @@ public class AvroRemindRequestValidator implements Validator<AvroRemindRequest> 
       avroScheduleValidator.validate(avroSchedule);
     }
 
-    if (avroRemindRequest.getToken() != null && avroRemindRequest.getToken().trim().isEmpty()) {
-      throw new ValidationException("token length should be greater or equal than 1");
-    }
-
     if (avroRemindRequest.getPriority() < 1 || avroRemindRequest.getPriority() > 255) {
       throw new ValidationException("priority should be between 1 and 255");
     }

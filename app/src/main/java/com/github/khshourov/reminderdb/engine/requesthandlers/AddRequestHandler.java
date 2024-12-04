@@ -81,18 +81,6 @@ public class AddRequestHandler implements RequestHandler {
       return;
     }
 
-    if (remindRequest.getToken().value() != null) {
-      this.responseHandler.send(
-          new Response(
-              AvroResponse.newBuilder()
-                  .setCode(ResponseType.E_0003.name())
-                  .setTitle("Payload Validation Error")
-                  .setDetails("Token can not be set in Add request")
-                  .build(),
-              request.getUser()));
-      return;
-    }
-
     Optional<Long> nextRemindAt = remindRequest.refreshNextRemindAt();
     if (nextRemindAt.isEmpty()) {
       this.responseHandler.send(

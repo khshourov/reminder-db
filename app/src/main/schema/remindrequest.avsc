@@ -32,11 +32,6 @@
         }
       },
       {
-        "name": "token",
-        "type": ["string", "null"],
-        "default": null
-      },
-      {
         "name": "priority",
         "type": "int",
         "default": 1

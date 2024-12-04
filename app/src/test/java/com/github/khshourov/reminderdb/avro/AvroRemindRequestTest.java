@@ -2,7 +2,6 @@ package com.github.khshourov.reminderdb.avro;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.khshourov.reminderdb.exceptions.ValidationException;
@@ -40,31 +39,6 @@ public class AvroRemindRequestTest {
     assertThrows(
         AvroRuntimeException.class,
         () -> AvroRemindRequest.newBuilder().setContext(validContext).setSchedules(null).build());
-  }
-
-  @Test
-  void tokenCanBeNullOrSkipped() {
-    assertDoesNotThrow(
-        () ->
-            AvroRemindRequest.newBuilder()
-                .setContext(validContext)
-                .setSchedules(List.of(schedule))
-                .build());
-
-    assertDoesNotThrow(
-        () ->
-            AvroRemindRequest.newBuilder()
-                .setContext(validContext)
-                .setSchedules(List.of(schedule))
-                .setToken(null)
-                .build());
-
-    assertNull(
-        AvroRemindRequest.newBuilder()
-            .setContext(validContext)
-            .setSchedules(List.of(schedule))
-            .build()
-            .getToken());
   }
 
   @Test

@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 public class RemindRequestTest {
   private static final String VALID_EXPRESSION = "0 0/5 9-17 15W 1/2 ? 2023-2025";
   private static final ByteBuffer VALID_CONTEXT = ByteBuffer.allocate(1);
-  private static final String VALID_TOKEN = "valid-token";
   private static final int VALID_PRIORITY = 13;
   private static final int MAX_RETRY = 3;
   private AvroSchedule schedule;
@@ -35,7 +34,6 @@ public class RemindRequestTest {
         AvroRemindRequest.newBuilder()
             .setContext(VALID_CONTEXT)
             .setSchedules(List.of(schedule))
-            .setToken(VALID_TOKEN)
             .setPriority(VALID_PRIORITY)
             .build();
     user = new User(1);
@@ -76,7 +74,6 @@ public class RemindRequestTest {
 
     assertEquals(VALID_CONTEXT, remindRequest.getContext());
     assertIterableEquals(List.of(Schedule.createFrom(schedule)), remindRequest.getSchedules());
-    assertEquals(VALID_TOKEN, remindRequest.getToken().value());
     assertEquals(VALID_PRIORITY, remindRequest.getPriority());
   }
 

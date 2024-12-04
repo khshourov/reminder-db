@@ -42,7 +42,6 @@ public class RemindRequest {
                   }
                 }))
             .toList();
-    this.token = new Token(avroRemindRequest.getToken());
     this.insertAt = timeService.getCurrentEpochSecond();
     this.updateAt = timeService.getCurrentEpochSecond();
     this.nextRemindAt = timeService.getCurrentEpochSecond();
