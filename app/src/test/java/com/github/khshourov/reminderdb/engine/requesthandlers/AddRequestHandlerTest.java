@@ -17,6 +17,7 @@ import com.github.khshourov.reminderdb.models.TimePoint;
 import com.github.khshourov.reminderdb.models.Token;
 import com.github.khshourov.reminderdb.models.User;
 import com.github.khshourov.reminderdb.testlib.FixedTimeService;
+import com.github.khshourov.reminderdb.testlib.MockAppService;
 import com.github.khshourov.reminderdb.testlib.MockRequestMultiplexer;
 import com.github.khshourov.reminderdb.testlib.MockResponseHandler;
 import com.github.khshourov.reminderdb.testlib.requestbuilders.RemindRequestBuilder;
@@ -41,7 +42,8 @@ public class AddRequestHandlerTest {
     remindStore = new MockRemindStore();
     responseHandler = new MockResponseHandler();
     timeService = new FixedTimeService();
-    requestHandler = new AddRequestHandler(remindStore, responseHandler, timeService);
+    requestHandler =
+        new AddRequestHandler(new MockAppService(remindStore, responseHandler, timeService));
     user = new User(1);
   }
 

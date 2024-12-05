@@ -16,6 +16,7 @@ import com.github.khshourov.reminderdb.models.Response;
 import com.github.khshourov.reminderdb.models.TimePoint;
 import com.github.khshourov.reminderdb.models.Token;
 import com.github.khshourov.reminderdb.models.User;
+import com.github.khshourov.reminderdb.testlib.MockAppService;
 import com.github.khshourov.reminderdb.testlib.MockRequestMultiplexer;
 import com.github.khshourov.reminderdb.testlib.MockResponseHandler;
 import java.io.IOException;
@@ -38,7 +39,8 @@ public class DeleteRequestHandlerTest {
   void init() {
     responseHandler = new MockResponseHandler();
     remindStore = new MockRemindStore();
-    deleteRequestHandler = new DeleteRequestHandler(remindStore, responseHandler);
+    deleteRequestHandler =
+        new DeleteRequestHandler(new MockAppService(remindStore, responseHandler, null));
     requestMultiplexer = new MockRequestMultiplexer();
     user = new User(1);
   }

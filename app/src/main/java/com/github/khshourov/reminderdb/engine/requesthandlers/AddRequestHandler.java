@@ -3,11 +3,9 @@ package com.github.khshourov.reminderdb.engine.requesthandlers;
 import com.github.khshourov.reminderdb.avro.AvroRemindRequest;
 import com.github.khshourov.reminderdb.avro.AvroResponse;
 import com.github.khshourov.reminderdb.engine.multiplexer.RequestMultiplexer;
-import com.github.khshourov.reminderdb.engine.responsehandlers.ResponseHandler;
 import com.github.khshourov.reminderdb.engine.responsehandlers.ResponseType;
 import com.github.khshourov.reminderdb.exceptions.ValidationException;
-import com.github.khshourov.reminderdb.interfaces.TimeService;
-import com.github.khshourov.reminderdb.lib.remindstore.RemindStore;
+import com.github.khshourov.reminderdb.interfaces.AppService;
 import com.github.khshourov.reminderdb.models.RemindRequest;
 import com.github.khshourov.reminderdb.models.Request;
 import com.github.khshourov.reminderdb.models.Response;
@@ -17,15 +15,10 @@ import java.util.Optional;
 public class AddRequestHandler implements RequestHandler {
   private static final int handlerId = HandlerType.ADD.ordinal();
 
-  private final RemindStore remindStore;
-  private final ResponseHandler responseHandler;
-  private final TimeService timeService;
+  private final AppService appService;
 
-  public AddRequestHandler(
-      RemindStore remindStore, ResponseHandler responseHandler, TimeService timeService) {
-    this.remindStore = remindStore;
-    this.responseHandler = responseHandler;
-    this.timeService = timeService;
+  public AddRequestHandler(AppService appService) {
+    this.appService = appService;
   }
 
   @Override
@@ -41,7 +34,7 @@ public class AddRequestHandler implements RequestHandler {
   @Override
   public void handle(Request request) {
     if (handlerId != request.getType()) {
-      this.responseHandler.send(
+      this.appService.send(
           new Response(
               AvroResponse.newBuilder()
                   .setCode(ResponseType.E_0001.name())
@@ -55,7 +48,7 @@ public class AddRequestHandler implements RequestHandler {
     try {
       avroRemindRequest = AvroRemindRequest.fromByteBuffer(request.getPayload());
     } catch (Exception e) {
-      this.responseHandler.send(
+      this.appService.send(
           new Response(
               AvroResponse.newBuilder()
                   .setCode(ResponseType.E_0002.name())
@@ -68,9 +61,10 @@ public class AddRequestHandler implements RequestHandler {
 
     RemindRequest remindRequest;
     try {
-      remindRequest = RemindRequest.createFrom(avroRemindRequest, request.getUser(), timeService);
+      remindRequest =
+          RemindRequest.createFrom(avroRemindRequest, request.getUser(), this.appService);
     } catch (ValidationException e) {
-      this.responseHandler.send(
+      this.appService.send(
           new Response(
               AvroResponse.newBuilder()
                   .setCode(ResponseType.E_0003.name())
@@ -83,7 +77,7 @@ public class AddRequestHandler implements RequestHandler {
 
     Optional<Long> nextRemindAt = remindRequest.refreshNextRemindAt();
     if (nextRemindAt.isEmpty()) {
-      this.responseHandler.send(
+      this.appService.send(
           new Response(
               AvroResponse.newBuilder()
                   .setCode(ResponseType.E_0003.name())
@@ -95,11 +89,11 @@ public class AddRequestHandler implements RequestHandler {
     }
 
     TimePoint timePoint =
-        new TimePoint((int) (nextRemindAt.get() - this.timeService.getCurrentEpochSecond()));
+        new TimePoint((int) (nextRemindAt.get() - this.appService.getCurrentEpochSecond()));
     // [TODO] There should be a threshold value such that (nextRemindAt - now) > threshold
-    this.remindStore.set(timePoint, remindRequest);
+    this.appService.set(timePoint, remindRequest);
 
-    this.responseHandler.send(
+    this.appService.send(
         new Response(
             AvroResponse.newBuilder().setCode(ResponseType.OK.name()).setTitle("Success").build(),
             request.getUser()));
